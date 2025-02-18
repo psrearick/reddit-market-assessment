@@ -22,7 +22,7 @@ class Classifier:
         Consider both explicit mentions and implicit references to this topic.
 
         Title: {post.title}
-        Content: {post.text}
+        Content: {post.content}
 
         Please respond with:
         Is this post about {self.topic}? (Yes/No)
