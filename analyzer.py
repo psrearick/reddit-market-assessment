@@ -43,11 +43,9 @@ class Analyzer:
         return all_posts
 
     def classify(self, post: Post):
-        return self.classifier.is_post_valid(post)
+        return self.classifier.is_valid(post)
 
     def format_comment(self, comment: PrawComment, depth=0) -> Comment:
-        """Format a single comment and its replies."""
-
         comment_data = Comment(
             id = comment.id,
             author = str(comment.author) if comment.author else "[deleted]",
@@ -74,6 +72,7 @@ class Analyzer:
                 formatted_comment = self.format_comment(comment)
                 if formatted_comment:
                     post.comments.append(formatted_comment)
+            print(post.title)
             return post
         except Exception as e:
             print(f"Error formatting submission {post.id}: {e}")
@@ -90,7 +89,7 @@ def main():
         classifier=classifier
     )
 
-    posts = analyzer.get_recent_posts()
+    posts = analyzer.get_recent_posts(days=1)
     valid_posts = [post for post in posts if analyzer.classify(post)]
     formatted_posts = [analyzer.format_post(post) for post in valid_posts]
     formatted_posts = [post for post in formatted_posts if post is not None]

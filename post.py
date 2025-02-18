@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from praw.models import Submission
 
@@ -13,7 +13,7 @@ class Post:
     subreddit: str
     score: int
     submission: Submission
-    comments: list = []
+    comments: list = field(default_factory=list)
 
 @dataclass
 class Comment:
@@ -23,4 +23,4 @@ class Comment:
     timestamp: str
     score: str
     depth: int
-    replies: list = []
+    replies: list = field(default_factory=list)
