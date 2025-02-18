@@ -33,6 +33,21 @@ class Classifier:
         Format: [Yes/No]|[0.0-1.0]|[explanation]
         """
 
+        completion = self.client.chat.completions.create(
+            model="google/gemini-2.0-flash-001",
+            messages=[
+                {
+                "role": "user",
+                "content": prompt
+                }
+            ]
+        )
+
+        print(completion.choices[0].message.content)
+
+        return False
+
+
     #     message = await client.messages.create(
     #         model="claude-3-5-sonnet-latest",
     #         max_tokens=1024,
