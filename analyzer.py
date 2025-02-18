@@ -261,7 +261,7 @@ def main():
 
     prompt = analyzer.create_ai_prompt(posts_with_comments)
     condensed_prompt = analyzer.create_condensed_ai_prompt(posts_with_comments)
-    formatted_posts = [post.format_post() for post in posts_with_comments]
+    formatted_posts = [post.to_dict() for post in posts_with_comments]
 
     # Example of saving the data
     with open("submissions_data.json", "w") as f:

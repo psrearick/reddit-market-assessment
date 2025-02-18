@@ -11,7 +11,23 @@ class Comment:
     date: datetime
     score: str
     depth: int
-    replies: list = field(default_factory=list)
+    replies: List["Comment"] = field(default_factory=list)
+
+    def to_dict(self, depth=0) -> Dict[str, str|list]:
+        formatted_comment = {
+            "id": self.id,
+            "author": self.author if self.author else "[deleted]",
+            "content": self.content,
+            "date": self.date.isoformat(),
+            "score": self.score,
+            "depth": depth,
+            "replies": []
+        }
+
+        for reply in self.replies:
+            formatted_comment["replies"].append(reply.to_dict(), depth+1)
+
+        return formatted_comment
 
 @dataclass
 class Post:
@@ -25,9 +41,9 @@ class Post:
     subreddit: str
     score: int
     submission: Submission
-    comments: List[Comment] = field(default_factory=list)
+    comments: List["Comment"] = field(default_factory=list)
 
-    def format_post(self) -> Dict[str, str|list]:
+    def to_dict(self) -> Dict[str, str|list]:
         formatted_data = {
             "id": self.id,
             "url": self.url,
@@ -41,23 +57,7 @@ class Post:
             "comments": []
         }
 
-        def format_comment(comment: Comment, depth=0) -> Dict[str, str|list]:
-            formatted_comment = {
-                "id": comment.id,
-                "author": comment.author if comment.author else "[deleted]",
-                "content": comment.content,
-                "date": comment.date.isoformat(),
-                "score": comment.score,
-                "depth": depth,
-                "replies": []
-            }
-
-            for reply in comment.replies:
-                formatted_comment["replies"].append(format_comment(reply, depth+1))
-
-            return formatted_comment
-
         for comment in self.comments:
-            formatted_data["comments"].append(format_comment(comment))
+            formatted_data["comments"].append(comment.to_dict())
 
         return formatted_data

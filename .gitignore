@@ -10,4 +10,6 @@ venv/
 *.log
 *.code-workspace
 scratch_files
-
+ai_prompt.txt
+ai_prompt_condensed.txt
+submissions_data.json

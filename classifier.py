@@ -27,7 +27,7 @@ class Classifier:
         Please respond with:
         Is this post about {self.topic}? (Yes/No)
 
-        Follow the provided formula. Your response must be a single word with no formatting.
+        Follow the provided format. Your response must be a single word with no formatting.
 
         Format: [Yes/No]
         """
