@@ -147,14 +147,14 @@ def main():
     all_relevant_posts = []
 
     # Fetch posts related to tech help for elderly parents
-    relevant_posts_target_subreddits = ['AgingParents', 'Caregivers', 'CaregiverSupport', 'Scams', 'TechSupport']
+    relevant_posts_target_subreddits = ['AgingParents', 'Caregivers', 'CaregiverSupport', 'TechSupport']
     keywords = ['tech help', 'computer problems', 'internet safety', 'scam', 'digital literacy', 'teaching parents', 'grandparents tech', 'elderly tech']
-    relevant_posts = analyzer.fetch_relevant_posts_from_subreddits(relevant_posts_target_subreddits, keywords, limit=20)
+    relevant_posts = analyzer.fetch_relevant_posts_from_subreddits(relevant_posts_target_subreddits, keywords, limit=200)
     all_relevant_posts.extend(relevant_posts)
 
     # Fetch top posts from specific subreddits related to elderly care
     top_post_target_subreddits = ['AgingParents', 'Caregivers', 'CaregiverSupport']
-    top_posts = analyzer.fetch_top_posts_from_subreddits(top_post_target_subreddits, limit=10)
+    top_posts = analyzer.fetch_top_posts_from_subreddits(top_post_target_subreddits, limit=100)
     all_relevant_posts.extend(top_posts)
 
     unique_posts = {post['id']: post for post in all_relevant_posts}.values()
@@ -165,7 +165,7 @@ def main():
 
     # Prioritize posts with high engagement (num_comments).
     sorted_posts = sorted(unique_posts, key=lambda x: x['num_comments'], reverse=True)
-    top_n_posts_for_comments = list(sorted_posts)[:50] # Adjust N based on your needs and API limits
+    top_n_posts_for_comments = list(sorted_posts)[:500] # Adjust N based on your needs and API limits
 
     for i, post in enumerate(top_n_posts_for_comments):
         print(f"Fetching comments for post {i+1}/{len(top_n_posts_for_comments)}: {post['title']}")
