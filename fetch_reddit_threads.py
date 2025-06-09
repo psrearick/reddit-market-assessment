@@ -6,16 +6,15 @@ import re
 import time
 from praw.models import Comment
 
-
 TARGET_SUBREDDITS = ['AgingParents', 'Caregivers', 'CaregiverSupport', 'TechSupport']
 KEYWORDS = ['tech help', 'computer problems', 'internet safety', 'scam',
             'digital literacy', 'teaching parents', 'grandparents tech',
             'elderly tech', 'zoom help', 'phishing', 'online security',
             'social media safety', 'digital skills', 'senior tech',
             'elderly computer']
-POST_LIMIT_PER_QUERY = 10 # Number of posts to fetch for each keyword in each subreddit
-COMMENT_LIMIT_PER_POST = 5 # Max number of comments to fetch for each post
-MAX_REPLIES_PER_COMMENT = 5 # Max replies to fetch for each top-level comment
+POST_LIMIT_PER_QUERY = 150 # Number of posts to fetch for each keyword in each subreddit
+COMMENT_LIMIT_PER_POST = 50 # Max number of comments to fetch for each post
+MAX_REPLIES_PER_COMMENT = 10 # Max replies to fetch for each top-level comment
 REPLY_FETCH_DEPTH = 1 # How many levels of replies to fetch (1 = top-level + their direct replies)
 OUTPUT_FILE = 'reddit_threads.json'
 
@@ -146,7 +145,7 @@ class Fetcher:
                 try:
                     for submission in subreddit.search(keyword, limit=POST_LIMIT_PER_QUERY):
                         self.process_submission(submission, sub_name)
-                        time.sleep(0.5)
+                        time.sleep(0.25)
                 except Exception as e:
                     print(f"    An error occurred while searching in r/{sub_name}: {e}")
                     time.sleep(5) # Wait a bit if there's a broader issue
@@ -162,7 +161,7 @@ class Fetcher:
                 try:
                     for submission in subreddit.top(time_filter=time_filter, limit=limit):
                         self.process_submission(submission, subreddit_name)
-                        time.sleep(0.5)
+                        time.sleep(0.25)
                 except Exception as e:
                     print(f"    An error occurred while fetching top posts from r/{subreddit_name}: {e}")
                     time.sleep(5)

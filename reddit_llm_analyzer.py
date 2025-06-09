@@ -13,13 +13,13 @@ if not OPENROUTER_API_KEY:
 OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 # Stage 1: Fast, cheap model for filtering
-FILTER_MODEL = "mistralai/mistral-7b-instruct"
+FILTER_MODEL = "mistralai/mistral-nemo"
 # Stage 2: Powerful, more expensive model for deep analysis
-ANALYSIS_MODEL = "openai/gpt-4o"
+ANALYSIS_MODEL = "google/gemini-2.5-flash-preview-05-20"
 
 # File paths
 THREADS_FILE = 'reddit_threads.json'
-OUTPUT_DIR = 'optimized_llm_results'
+OUTPUT_DIR = 'results'
 
 # Limits
 MAX_COMMENTS_PER_POST = 30 # Limit the number of comments per post to keep context manageable
@@ -90,9 +90,9 @@ def build_thread_context(thread_object):
 # --- Main Logic ---
 
 def main():
-    print("Starting Optimized LLM Analysis...")
+    print("Starting LLM Analysis...")
 
-    threads = load_json_data(THREADS_FILE)
+    threads = load_json_data(os.path.join(OUTPUT_DIR, THREADS_FILE))
 
     if not threads:
         print("No threads found. Exiting.")

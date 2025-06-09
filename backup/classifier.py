@@ -2,7 +2,7 @@ import os
 from typing import List
 from dotenv import load_dotenv
 from openai import OpenAI
-from post import Post
+from backup.post import Post
 
 class Classifier:
     def __init__(self, subreddits: List[str] = []) -> None:

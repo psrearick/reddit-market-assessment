@@ -8,7 +8,7 @@ from praw.models import Comment as PrawComment
 import pytz
 from concurrent.futures import ThreadPoolExecutor
 from classifier import Classifier
-from post import Post, Comment
+from backup.post import Post, Comment
 from writing_tool_classifier import WritingToolClassifier
 
 class Analyzer:
