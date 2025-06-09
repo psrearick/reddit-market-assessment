@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 import os
 import praw
 import json
+from praw.models import Comment
 
 class Analyzer:
     def __init__(self, client_id: str, client_secret: str, user_agent: str):
@@ -81,11 +82,12 @@ class Analyzer:
         submission.comments.replace_more(limit=limit) # Expand 'More Comments'
         comments_data = []
         for comment in submission.comments.list():
-            if isinstance(comment, praw.models.Comment): # Ensure it's a valid comment object
+            if isinstance(comment, Comment): # Ensure it's a valid comment object
                 comments_data.append({
                     'id': comment.id,
                     'body': comment.body,
-                    'author': str(comment.author), # Convert Redditor object to string
+                    'author': "anonymous",
+                    # 'author': str(comment.author), # Convert Redditor object to string
                     'score': comment.score,
                     'created_utc': comment.created_utc,
                     'permalink': f"https://reddit.com{comment.permalink}"
@@ -106,12 +108,12 @@ def main():
     # Fetch posts related to tech help for elderly parents
     relevant_posts_target_subreddits = ['AgingParents', 'Caregivers', 'CaregiverSupport', 'Scams', 'TechSupport']
     keywords = ['tech help', 'computer problems', 'internet safety', 'scam', 'digital literacy', 'teaching parents', 'grandparents tech', 'elderly tech']
-    relevant_posts = analyzer.fetch_relevant_posts_from_subreddits(relevant_posts_target_subreddits, keywords, limit=200)
+    relevant_posts = analyzer.fetch_relevant_posts_from_subreddits(relevant_posts_target_subreddits, keywords, limit=20)
     all_relevant_posts.extend(relevant_posts)
 
     # Fetch top posts from specific subreddits related to elderly care
     top_post_target_subreddits = ['AgingParents', 'Caregivers', 'CaregiverSupport']
-    top_posts = analyzer.fetch_top_posts_from_subreddits(top_post_target_subreddits, limit=100)
+    top_posts = analyzer.fetch_top_posts_from_subreddits(top_post_target_subreddits, limit=10)
     all_relevant_posts.extend(top_posts)
 
     unique_posts = {post['id']: post for post in all_relevant_posts}.values()
@@ -122,7 +124,7 @@ def main():
 
     # Prioritize posts with high engagement (num_comments).
     sorted_posts = sorted(unique_posts, key=lambda x: x['num_comments'], reverse=True)
-    top_n_posts_for_comments = list(sorted_posts)[:500] # Adjust N based on your needs and API limits
+    top_n_posts_for_comments = list(sorted_posts)[:50] # Adjust N based on your needs and API limits
 
     for i, post in enumerate(top_n_posts_for_comments):
         print(f"Fetching comments for post {i+1}/{len(top_n_posts_for_comments)}: {post['title']}")
