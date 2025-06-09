@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 import os
 import praw
 import json
+import re
 from praw.models import Comment
 
 class Analyzer:
@@ -13,6 +14,46 @@ class Analyzer:
             user_agent=user_agent
         )
 
+    def markdown_to_plain_text(self, text):
+        """Convert markdown text to plain text."""
+        if not text or text.strip() == "":
+            return text
+
+        # First, handle Reddit-specific markdown
+        # Remove Reddit quotes (lines starting with >)
+        text = re.sub(r'^&gt;.*$', '', text, flags=re.MULTILINE)
+        text = re.sub(r'^>.*$', '', text, flags=re.MULTILINE)
+
+        # Remove markdown links [text](url)
+        text = re.sub(r'\[([^\]]+)\]\([^\)]+\)', r'\1', text)
+
+        # Remove markdown emphasis
+        text = re.sub(r'\*\*(.*?)\*\*', r'\1', text)  # Bold
+        text = re.sub(r'\*(.*?)\*', r'\1', text)      # Italic
+        text = re.sub(r'~~(.*?)~~', r'\1', text)      # Strikethrough
+        text = re.sub(r'`(.*?)`', r'\1', text)        # Inline code
+
+        # Remove code blocks
+        text = re.sub(r'```[\s\S]*?```', '', text)
+        text = re.sub(r'    .*$', '', text, flags=re.MULTILINE)  # Indented code
+
+        # Remove headers
+        text = re.sub(r'^#{1,6}\s*', '', text, flags=re.MULTILINE)
+
+        # Remove horizontal rules
+        text = re.sub(r'^[-*_]{3,}$', '', text, flags=re.MULTILINE)
+
+        # Remove bullet points and numbering
+        text = re.sub(r'^\s*[\*\-\+]\s+', '', text, flags=re.MULTILINE)
+        text = re.sub(r'^\s*\d+\.\s+', '', text, flags=re.MULTILINE)
+
+        # Clean up extra whitespace
+        text = re.sub(r'\n\s*\n', '\n\n', text)  # Multiple empty lines to double
+        text = re.sub(r'[ \t]+', ' ', text)      # Multiple spaces/tabs to single space
+        text = text.strip()
+
+        return text
+
     # Fetch posts by search query within a subreddit
     def fetch_posts_by_search(self, subreddit_name, query, limit=500):
         subreddit = self.reddit.subreddit(subreddit_name)
@@ -21,8 +62,8 @@ class Analyzer:
         for submission in subreddit.search(query, limit=limit):
             posts.append({
                 'id': submission.id,
-                'title': submission.title,
-                'selftext': submission.selftext,
+                'title': self.markdown_to_plain_text(submission.title),
+                'selftext': self.markdown_to_plain_text(submission.selftext),
                 'url': submission.url,
                 'subreddit': subreddit_name,
                 'score': submission.score,
@@ -42,8 +83,8 @@ class Analyzer:
         for submission in subreddit.top(time_filter=time_filter, limit=limit):
             posts.append({
                 'id': submission.id,
-                'title': submission.title,
-                'selftext': submission.selftext,
+                'title': self.markdown_to_plain_text(submission.title),
+                'selftext': self.markdown_to_plain_text(submission.selftext),
                 'url': submission.url,
                 'subreddit': subreddit_name,
                 'score': submission.score,
@@ -77,7 +118,7 @@ class Analyzer:
         return list(unique_posts)
 
     # Function to fetch comments for a given submission
-    def fetch_comments_for_submission(self, submission_id, limit=None):
+    def fetch_comments_for_submission(self, submission_id, limit=5):
         submission = self.reddit.submission(id=submission_id)
         submission.comments.replace_more(limit=limit) # Expand 'More Comments'
         comments_data = []
@@ -85,7 +126,7 @@ class Analyzer:
             if isinstance(comment, Comment): # Ensure it's a valid comment object
                 comments_data.append({
                     'id': comment.id,
-                    'body': comment.body,
+                    'body': self.markdown_to_plain_text(comment.body),
                     'author': "anonymous",
                     # 'author': str(comment.author), # Convert Redditor object to string
                     'score': comment.score,
@@ -129,7 +170,7 @@ def main():
     for i, post in enumerate(top_n_posts_for_comments):
         print(f"Fetching comments for post {i+1}/{len(top_n_posts_for_comments)}: {post['title']}")
         try:
-            all_comments.extend(analyzer.fetch_comments_for_submission(post['id']))
+            all_comments.extend(analyzer.fetch_comments_for_submission(post['id'], limit=5))
         except Exception as e:
             print(f"Error fetching comments for {post['id']}: {e}")
         # time.sleep(1)
