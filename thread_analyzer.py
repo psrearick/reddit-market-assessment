@@ -70,12 +70,12 @@ class ThreadAnalyzer:
             # We only need the thread title and body for the initial filter to save tokens
             thread_content_for_filter = f"Title: {thread.get('title', '')}\nBody: {thread.get('selftext', '')}"
 
-            filter_user_prompt = self.config.config.FILTER_USER_PROMPT_TEMPLATE.format(
+            filter_user_prompt = self.config.config.filter_user_prompt_template.format(
                 thread_content=thread_content_for_filter
             )
 
             prompt_messages = [
-                {"role": "system", "content": self.config.config.FILTER_SYSTEM_PROMPT},
+                {"role": "system", "content": self.config.config.filter_system_prompt},
                 {"role": "user", "content": filter_user_prompt}
             ]
 
@@ -117,12 +117,12 @@ class ThreadAnalyzer:
                 print(f"  -> SKIPPING: Thread context is too long ({estimated_tokens} tokens approx).")
                 continue
 
-            analysis_user_prompt = self.config.config.ANALYSIS_USER_PROMPT_TEMPLATE.format(
+            analysis_user_prompt = self.config.config.analysis_user_prompt_template.format(
                 thread_context=thread_context
             )
 
             prompt_messages = [
-                {"role": "system", "content": self.config.config.ANALYSIS_SYSTEM_PROMPT},
+                {"role": "system", "content": self.config.config.analysis_system_prompt},
                 {"role": "user", "content": analysis_user_prompt}
             ]
 

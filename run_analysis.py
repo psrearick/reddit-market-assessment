@@ -103,8 +103,8 @@ Examples:
 
     try:
         config = load_concept_config(args.config)
-        print(f"Loaded configuration for: {config.CONCEPT_NAME}")
-        print(f"Description: {config.CONCEPT_DESCRIPTION}")
+        print(f"Loaded configuration for: {config.concept_name}")
+        print(f"Description: {config.concept_description}")
     except Exception as e:
         print(f"Error loading configuration: {e}")
         sys.exit(1)
@@ -126,7 +126,7 @@ Examples:
     start_time = time.time()
     success = True
 
-    print(f"\nStarting analysis pipeline for concept: {config.CONCEPT_NAME}")
+    print(f"\nStarting analysis pipeline for concept: {config.concept_name}")
     print(f"Started at: {time.strftime('%Y-%m-%d %H:%M:%S')}")
 
     # Step 1: Fetch Reddit data
@@ -168,11 +168,11 @@ Examples:
     print(f"{'='*60}")
     print(f"Total time: {int(minutes)}m {int(seconds)}s")
     print(f"Results saved in: results/")
-    print(f"Final report: results/{config.OUTPUT_FILE_PREFIX}_market_validation_report.md")
-    print(f"Thematic summary: results/{config.OUTPUT_FILE_PREFIX}_thematic_summary.json")
+    print(f"Final report: results/{config.output_file_prefix}_market_validation_report.md")
+    print(f"Thematic summary: results/{config.output_file_prefix}_thematic_summary.json")
 
     # Check if final report exists and show file size
-    report_path = f"results/{config.OUTPUT_FILE_PREFIX}_market_validation_report.md"
+    report_path = f"results/{config.output_file_prefix}_market_validation_report.md"
     if os.path.exists(report_path):
         file_size = os.path.getsize(report_path)
         print(f"Report size: {file_size:,} bytes")

@@ -146,8 +146,8 @@ class ReportSynthesizer:
                 full_context += f"Data type: {type(summary).__name__}, Length: {len(summary) if hasattr(summary, '__len__') else 'N/A'}\n"
             full_context += "\n---\n"
 
-        system_prompt = self.config.config.REPORT_SYSTEM_PROMPT
-        user_prompt = self.config.config.REPORT_USER_PROMPT_TEMPLATE.format(full_context=full_context)
+        system_prompt = self.config.config.report_system_prompt
+        user_prompt = self.config.config.report_user_prompt_template.format(full_context=full_context)
 
         messages = [
             {"role": "system", "content": system_prompt},

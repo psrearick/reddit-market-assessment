@@ -27,11 +27,11 @@ def test_config(config_path):
 
         # Check required attributes
         required_attrs = [
-            'CONCEPT_NAME', 'CONCEPT_DESCRIPTION', 'TARGET_SUBREDDITS', 'KEYWORDS',
-            'FILTER_SYSTEM_PROMPT', 'FILTER_USER_PROMPT_TEMPLATE',
-            'ANALYSIS_SYSTEM_PROMPT', 'ANALYSIS_USER_PROMPT_TEMPLATE',
-            'ANALYSIS_CATEGORIES', 'REPORT_SYSTEM_PROMPT', 'REPORT_USER_PROMPT_TEMPLATE',
-            'OUTPUT_FILE_PREFIX'
+            'concept_name', 'concept_description', 'target_subreddits', 'keywords',
+            'filter_system_prompt', 'filter_user_prompt_template',
+            'analysis_system_prompt', 'analysis_user_prompt_template',
+            'analysis_categories', 'report_system_prompt', 'report_user_prompt_template',
+            'output_file_prefix'
         ]
 
         missing_attrs = []
@@ -44,18 +44,18 @@ def test_config(config_path):
             return False
 
         # Validate basic structure
-        print(f"Concept Name: {config.CONCEPT_NAME}")
-        print(f"Description: {config.CONCEPT_DESCRIPTION}")
-        print(f"Target Subreddits: {len(config.TARGET_SUBREDDITS)} subreddits")
-        print(f"Keywords: {len(config.KEYWORDS)} keywords")
-        print(f"Analysis Categories: {len(config.ANALYSIS_CATEGORIES)} categories")
-        print(f"Output Prefix: {config.OUTPUT_FILE_PREFIX}")
+        print(f"Concept Name: {config.concept_name}")
+        print(f"Description: {config.concept_description}")
+        print(f"Target Subreddits: {len(config.target_subreddits)} subreddits")
+        print(f"Keywords: {len(config.keywords)} keywords")
+        print(f"Analysis Categories: {len(config.analysis_categories)} categories")
+        print(f"Output Prefix: {config.output_file_prefix}")
 
         # Test prompt templates
         try:
-            test_format = config.FILTER_USER_PROMPT_TEMPLATE.format(thread_content="test")
-            test_format = config.ANALYSIS_USER_PROMPT_TEMPLATE.format(thread_context="test")
-            test_format = config.REPORT_USER_PROMPT_TEMPLATE.format(full_context="test")
+            test_format = config.filter_user_prompt_template.format(thread_content="test")
+            test_format = config.analysis_user_prompt_template.format(thread_context="test")
+            test_format = config.report_user_prompt_template.format(full_context="test")
             print("Prompt templates are valid")
         except KeyError as e:
             print(f"Invalid prompt template: missing {e}")
