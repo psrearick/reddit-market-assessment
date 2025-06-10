@@ -9,7 +9,7 @@ import subprocess
 import sys
 import os
 import time
-from utils.config_manager import ConceptConfig
+from utils import ConceptConfig
 
 def load_concept_config(config_path: str) -> ConceptConfig:
     """Load configuration from a Python file."""

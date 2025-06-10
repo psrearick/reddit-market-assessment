@@ -1,8 +1,6 @@
 """Report synthesis from LLM analysis results."""
 
-from utils import FileManager
-from utils.config_manager import ConfigManager
-from utils.llm_client import LLMClient
+from utils import FileManager, ConfigManager, LLMClient
 
 
 class ReportSynthesizer:

@@ -5,7 +5,7 @@ Test script to validate configuration loading and basic functionality.
 
 import os
 import sys
-from utils.config_manager import ConceptConfig
+from utils import ConceptConfig
 
 def load_concept_config(config_path : str) -> ConceptConfig:
     """Load configuration from a Python file."""
