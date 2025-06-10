@@ -21,7 +21,7 @@ def load_concept_config(config_path):
 # Parse command line arguments
 parser = argparse.ArgumentParser(description='Analyze Reddit threads with LLM for market research')
 parser.add_argument('--config', default='concept_config.py',
-                   help='Path to concept configuration file (default: concept_config.py)')
+                    help='Path to concept configuration file (default: concept_config.py)')
 args = parser.parse_args()
 
 # Load configuration
@@ -36,13 +36,13 @@ if not OPENROUTER_API_KEY:
 OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 # Stage 1: Fast, cheap model for filtering
-FILTER_MODEL = "mistralai/mistral-nemo"
+FILTER_MODEL = os.getenv("ANALYSIS_FILTER_MODEL")
 # Stage 2: Powerful, more expensive model for deep analysis
-ANALYSIS_MODEL = "google/gemini-2.5-flash-preview-05-20"
+ANALYSIS_MODEL = os.getenv("ANALYSIS_MODEL")
 
 # File paths - using concept-specific naming
 THREADS_FILE = f'{config.OUTPUT_FILE_PREFIX}_reddit_threads.json'
-OUTPUT_DIR = 'results'
+OUTPUT_DIR = os.getenv("OUTPUT_DIR", 'results')
 
 # Limits
 MAX_COMMENTS_PER_POST = 30 # Limit the number of comments per post to keep context manageable

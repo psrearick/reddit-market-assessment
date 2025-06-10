@@ -35,12 +35,12 @@ KEYWORDS = config.KEYWORDS
 OUTPUT_FILE_PREFIX = config.OUTPUT_FILE_PREFIX
 
 # Default settings (not concept-specific)
-POST_LIMIT_PER_QUERY = 150 # Number of posts to fetch for each keyword in each subreddit
-COMMENT_LIMIT_PER_POST = 50 # Max number of comments to fetch for each post
-MAX_REPLIES_PER_COMMENT = 10 # Max replies to fetch for each top-level comment
-REPLY_FETCH_DEPTH = 1 # How many levels of replies to fetch (1 = top-level + their direct replies)
+POST_LIMIT_PER_QUERY = os.getenv("POST_LIMIT_PER_QUERY", 150) # Number of posts to fetch for each keyword in each subreddit
+COMMENT_LIMIT_PER_POST = os.getenv("COMMENT_LIMIT_PER_POST", 50) # Max number of comments to fetch for each post
+MAX_REPLIES_PER_COMMENT = os.getenv("MAX_REPLIES_PER_COMMENT", 10) # Max replies to fetch for each top-level comment
+REPLY_FETCH_DEPTH = os.getenv("REPLY_FETCH_DEPTH", 1) # How many levels of replies to fetch (1 = top-level + their direct replies)
 OUTPUT_FILE = f'{OUTPUT_FILE_PREFIX}_reddit_threads.json'
-OUTPUT_DIR = 'results'
+OUTPUT_DIR = os.getenv("OUTPUT_DIR", 'results')
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 

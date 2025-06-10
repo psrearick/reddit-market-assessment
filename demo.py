@@ -6,6 +6,9 @@ with different product concepts.
 
 import os
 import sys
+from dotenv import load_dotenv
+
+OUTPUT_DIR = os.getenv("OUTPUT_DIR", 'results')
 
 def demo_concept_switching():
     """Demonstrate how easy it is to switch between different product concepts."""
@@ -61,10 +64,10 @@ def demo_concept_switching():
     print()
 
     print("All results will be saved with your concept name as prefix:")
-    print("   results/{concept_name}_reddit_threads.json")
-    print("   results/{concept_name}_final_analysis_results.json")
-    print("   results/{concept_name}_thematic_summary.json")
-    print("   results/{concept_name}_market_validation_report.md")
+    print(f"   {OUTPUT_DIR}/{{concept_name}}_reddit_threads.json")
+    print(f"   {OUTPUT_DIR}/{{concept_name}}_final_analysis_results.json")
+    print(f"   {OUTPUT_DIR}/{{concept_name}}_thematic_summary.json")
+    print(f"   {OUTPUT_DIR}/{{concept_name}}_market_validation_report.md")
     print()
 
     print("Example analysis commands:")
@@ -99,7 +102,7 @@ def show_file_structure():
             "README.md - Complete documentation"
         ]),
         ("Output Directory", [
-            "results/ - All analysis outputs go here"
+            f"{OUTPUT_DIR}/ - All analysis outputs go here"
         ])
     ]
 
@@ -114,6 +117,7 @@ def show_file_structure():
 
 def main():
     """Main demo function."""
+    load_dotenv()
     if len(sys.argv) > 1 and sys.argv[1] == '--structure':
         show_file_structure()
     else:

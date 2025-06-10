@@ -20,7 +20,7 @@ def load_concept_config(config_path):
 # Parse command line arguments
 parser = argparse.ArgumentParser(description='Synthesize LLM analysis results into final report')
 parser.add_argument('--config', default='concept_config.py',
-                   help='Path to concept configuration file (default: concept_config.py)')
+                    help='Path to concept configuration file (default: concept_config.py)')
 args = parser.parse_args()
 
 # Load configuration
@@ -35,9 +35,9 @@ if not OPENROUTER_API_KEY:
 OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 # Use a powerful model for these complex synthesis tasks
-SYNTHESIS_MODEL = "google/gemini-2.5-pro-preview"
+SYNTHESIS_MODEL = os.getenv("SYNTHESIS_MODEL")
 
-OUTPUT_DIR = 'results'
+OUTPUT_DIR = os.getenv("OUTPUT_DIR", 'results')
 # Input file from the previous script - now concept-specific
 ANALYSIS_FILE = os.path.join(OUTPUT_DIR, f'{config.OUTPUT_FILE_PREFIX}_final_analysis_results.json')
 # Output files - now concept-specific
