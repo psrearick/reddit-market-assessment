@@ -15,11 +15,13 @@ OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 # SYNTHESIS_MODEL = "anthropic/claude-sonnet-4"
 SYNTHESIS_MODEL = "google/gemini-2.5-pro-preview"
 
+OUTPUT_DIR = 'results'
 # Input file from the previous script
-ANALYSIS_FILE = os.path.join('results', 'final_analysis_results.json')
+ANALYSIS_FILE = os.path.join(OUTPUT_DIR, 'final_analysis_results.json')
 # Output files
-THEMATIC_SUMMARY_FILE = os.path.join('results', 'thematic_summary.json')
-FINAL_REPORT_FILE = os.path.join('results', 'market_validation_report.md')
+THEMATIC_SUMMARY_FILE = os.path.join(OUTPUT_DIR, 'thematic_summary.json')
+FINAL_REPORT_FILE = os.path.join(OUTPUT_DIR, 'market_validation_report.md')
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # --- Helper Functions ---
 def load_json_data(filepath):
@@ -153,10 +155,17 @@ def generate_final_report(thematic_summaries):
         full_context += f"## Thematic Summary for: {key}\n\n"
         if isinstance(summary, list) and summary:
             for theme in summary:
-                full_context += f"- **Theme:** {theme.get('theme_name', 'N/A')} (Count: {theme.get('count', 0)})\n"
-                full_context += f"  - Examples: {'; '.join(theme.get('example_items', []))}\n"
+                if isinstance(theme, dict):
+                    full_context += f"- **Theme:** {theme.get('theme_name', 'N/A')} (Count: {theme.get('count', 0)})\n"
+                    full_context += f"  - Examples: {'; '.join(theme.get('example_items', []))}\n"
+                else:
+                    full_context += f"- **Item:** {theme}\n"
         elif key == 'high_value_threads':
             full_context += f"Found {len(summary)} high-value discussion threads.\n"
+        elif isinstance(summary, dict) and 'error' in summary:
+            full_context += f"Error processing {key}: {summary.get('error', 'Unknown error')}\n"
+        else:
+            full_context += f"Data type: {type(summary).__name__}, Length: {len(summary) if hasattr(summary, '__len__') else 'N/A'}\n"
         full_context += "\n---\n"
 
     system_prompt = "You are a senior market research analyst and strategist. Your task is to write a comprehensive, yet concise, market validation report for a new online learning platform. The platform aims to help tech-savvy individuals teach technology to non-tech-savvy loved ones. Use the provided thematic data to structure your report."

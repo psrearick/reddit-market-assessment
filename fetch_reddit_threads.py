@@ -17,6 +17,9 @@ COMMENT_LIMIT_PER_POST = 50 # Max number of comments to fetch for each post
 MAX_REPLIES_PER_COMMENT = 10 # Max replies to fetch for each top-level comment
 REPLY_FETCH_DEPTH = 1 # How many levels of replies to fetch (1 = top-level + their direct replies)
 OUTPUT_FILE = 'reddit_threads.json'
+OUTPUT_DIR = 'results'
+
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 def markdown_to_plain_text(text):
     """Convert markdown text to plain text."""
@@ -183,7 +186,7 @@ def main():
     threads_list = list(fetcher.all_threads.values())
 
     # Save the final combined data to a single JSON file
-    with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
+    with open(os.path.join(OUTPUT_DIR, OUTPUT_FILE), 'w', encoding='utf-8') as f:
         json.dump(threads_list, f, ensure_ascii=False, indent=4)
 
     print(f"Successfully saved all threads and their comments to {OUTPUT_FILE}")
