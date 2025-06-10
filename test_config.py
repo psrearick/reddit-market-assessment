@@ -3,20 +3,14 @@
 Test script to validate configuration loading and basic functionality.
 """
 
-import importlib.util
 import os
 import sys
 
 def load_concept_config(config_path):
     """Load configuration from a Python file."""
-    spec = importlib.util.spec_from_file_location("concept_config", config_path)
-    if spec is None:
-        raise ImportError(f"Could not load config from {config_path}")
-    config = importlib.util.module_from_spec(spec)
-    if spec.loader is None:
-        raise ImportError(f"Could not get loader for {config_path}")
-    spec.loader.exec_module(config)
-    return config
+    from utils import ConfigManager
+    config_manager = ConfigManager(config_path)
+    return config_manager.config
 
 def test_config(config_path):
     """Test that a configuration file is valid."""
