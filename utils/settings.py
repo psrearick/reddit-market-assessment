@@ -21,9 +21,9 @@ class Settings:
         self.openrouter_api_url = "https://openrouter.ai/api/v1/chat/completions"
 
         # Model configurations
-        self.filter_model = os.getenv("ANALYSIS_FILTER_MODEL")
-        self.analysis_model = os.getenv("ANALYSIS_MODEL")
-        self.synthesis_model = os.getenv("SYNTHESIS_MODEL")
+        self.filter_model = os.getenv("ANALYSIS_FILTER_MODEL", "mistralai/mistral-nemo")
+        self.analysis_model = os.getenv("ANALYSIS_MODEL", "gpt-4o-mini")
+        self.synthesis_model = os.getenv("SYNTHESIS_MODEL", "gpt-4o-mini")
 
         # Reddit fetching limits
         self.post_limit_per_query = int(os.getenv("POST_LIMIT_PER_QUERY", "150"))
@@ -44,7 +44,7 @@ class Settings:
         self.reddit_request_delay = float(os.getenv("REDDIT_REQUEST_DELAY", "0.25"))
         self.reddit_more_comments_limit = int(os.getenv("REDDIT_MORE_COMMENTS_LIMIT", "10"))
 
-    def validate_required_settings(self):
+    def validate_required_settings(self) -> bool:
         """Validate that all required settings are present."""
         required_settings = [
             ('OPENROUTER_API_KEY', self.openrouter_api_key),

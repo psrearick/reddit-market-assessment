@@ -8,7 +8,7 @@ class FileManager:
     """Handles file operations for the framework."""
 
     @staticmethod
-    def load_json(filepath):
+    def load_json(filepath: str) -> dict|list|None:
         """
         Load JSON data from a file with error handling.
 
@@ -26,7 +26,7 @@ class FileManager:
             return None
 
     @staticmethod
-    def save_json(data, filepath):
+    def save_json(data: dict | list, filepath: str) -> None:
         """
         Save data as JSON to a file.
 
@@ -39,7 +39,7 @@ class FileManager:
             json.dump(data, f, indent=4, ensure_ascii=False)
 
     @staticmethod
-    def save_text(content, filepath):
+    def save_text(content: str, filepath: str) -> None:
         """
         Save text content to a file.
 
@@ -52,12 +52,12 @@ class FileManager:
             f.write(content)
 
     @staticmethod
-    def file_exists(filepath):
+    def file_exists(filepath: str) -> bool:
         """Check if a file exists."""
         return os.path.exists(filepath)
 
     @staticmethod
-    def get_file_size(filepath):
+    def get_file_size(filepath: str) -> int:
         """Get file size in bytes."""
         if os.path.exists(filepath):
             return os.path.getsize(filepath)

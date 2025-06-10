@@ -1,12 +1,14 @@
 """Report synthesis from LLM analysis results."""
 
 from utils import FileManager
+from utils.config_manager import ConfigManager
+from utils.llm_client import LLMClient
 
 
 class ReportSynthesizer:
     """Handles synthesis of analysis results into final reports."""
 
-    def __init__(self, config_manager, llm_client):
+    def __init__(self, config_manager : ConfigManager, llm_client: LLMClient):
         """
         Initialize the report synthesizer.
 
@@ -18,7 +20,7 @@ class ReportSynthesizer:
         self.llm = llm_client
         self.file_manager = FileManager()
 
-    def aggregate_data(self, analysis_data):
+    def aggregate_data(self, analysis_data : list[dict]) -> dict:
         """
         Aggregate all lists from the analysis file into master lists.
 
@@ -57,7 +59,7 @@ class ReportSynthesizer:
         aggregated['high_value_threads'] = high_value_threads
         return aggregated
 
-    def perform_thematic_analysis(self, items_list, category_name, item_description):
+    def perform_thematic_analysis(self, items_list: list[str], category_name: str, item_description: str) -> dict | None:
         """
         Use an LLM to cluster a list of strings into themes and count them.
 
@@ -90,16 +92,16 @@ class ReportSynthesizer:
         Return your analysis as a JSON object, which is a list of these themes, sorted by count in descending order.
         Example format:
         [
-          {{
-            "theme_name": "Example Theme 1",
-            "count": 42,
-            "example_items": ["Raw item A", "Raw item B"]
-          }},
-          {{
-            "theme_name": "Example Theme 2",
-            "count": 19,
-            "example_items": ["Raw item C", "Raw item D", "Raw item E"]
-          }}
+            {{
+                "theme_name": "Example Theme 1",
+                "count": 42,
+                "example_items": ["Raw item A", "Raw item B"]
+            }},
+            {{
+                "theme_name": "Example Theme 2",
+                "count": 19,
+                "example_items": ["Raw item C", "Raw item D", "Raw item E"]
+            }}
         ]
 
         Here is the list of raw items to analyze:
@@ -115,7 +117,7 @@ class ReportSynthesizer:
 
         return self.llm.call_with_json_response(messages, self.llm.settings.synthesis_model)
 
-    def generate_report(self, thematic_summaries):
+    def generate_report(self, thematic_summaries : dict) -> str:
         """
         Use an LLM to write a final market validation report from thematic summaries.
 
@@ -157,7 +159,7 @@ class ReportSynthesizer:
         report_content = self.llm.call_api(messages, self.llm.settings.synthesis_model)
         return report_content if report_content else "# Report Generation Failed"
 
-    def save_results(self, thematic_summaries, report):
+    def save_results(self, thematic_summaries: dict, report: str) -> None:
         """
         Save thematic summaries and final report.
 
@@ -175,7 +177,7 @@ class ReportSynthesizer:
         self.file_manager.save_text(report, report_file)
         print(f"Saved final market validation report to {report_file}")
 
-    def synthesize(self):
+    def synthesize(self) -> bool:
         """
         Main synthesis pipeline.
 
@@ -191,6 +193,9 @@ class ReportSynthesizer:
         analysis_data = self.file_manager.load_json(analysis_file)
         if not analysis_data:
             print(f"No analysis data found at {analysis_file}")
+            return False
+        if not isinstance(analysis_data, list):
+            print(f"Invalid analysis data format at {analysis_file}. Expected a list of dictionaries.")
             return False
 
         # Phase 0: Aggregate all the data into master lists

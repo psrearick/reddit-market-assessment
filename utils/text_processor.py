@@ -7,7 +7,7 @@ class TextProcessor:
     """Handles text processing operations."""
 
     @staticmethod
-    def markdown_to_plain_text(text):
+    def markdown_to_plain_text(text : str) -> str:
         """
         Convert markdown text to plain text.
 
@@ -55,7 +55,7 @@ class TextProcessor:
         return text
 
     @staticmethod
-    def estimate_token_count(text):
+    def estimate_token_count(text : str) -> int:
         """
         Rough estimation of token count (approximately 4 characters per token).
 

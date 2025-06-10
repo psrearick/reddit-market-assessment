@@ -2,14 +2,14 @@
 
 import praw
 import time
-from praw.models import Comment
+from praw.models import Comment, Submission
 from utils import Settings, ConfigManager, FileManager, TextProcessor
 
 
 class RedditFetcher:
     """Handles Reddit data fetching operations."""
 
-    def __init__(self, config_manager, settings):
+    def __init__(self, config_manager: ConfigManager, settings: Settings):
         """
         Initialize the Reddit fetcher.
 
@@ -24,7 +24,7 @@ class RedditFetcher:
         self.reddit = self._init_reddit_client()
         self.all_threads = {}
 
-    def _init_reddit_client(self):
+    def _init_reddit_client(self) -> praw.Reddit:
         """Initialize Reddit client with credentials."""
         return praw.Reddit(
             client_id=self.settings.reddit_client_id,
@@ -32,7 +32,7 @@ class RedditFetcher:
             user_agent=self.settings.reddit_user_agent
         )
 
-    def fetch_replies(self, comment: Comment, current_depth):
+    def fetch_replies(self, comment: Comment, current_depth: int = 0) -> list[dict]:
         """
         Recursively fetch replies up to a certain depth.
 
@@ -66,7 +66,7 @@ class RedditFetcher:
                 })
         return replies_data
 
-    def process_submission(self, submission, sub_name):
+    def process_submission(self, submission : Submission, sub_name: str) -> None:
         """
         Process a single submission, fetching its comments and replies.
 
@@ -117,7 +117,7 @@ class RedditFetcher:
             'comments': comments_data
         }
 
-    def fetch_keyword_threads(self):
+    def fetch_keyword_threads(self) -> None:
         """Fetch posts based on keywords from target subreddits."""
         for sub_name in self.config.target_subreddits:
             subreddit = self.reddit.subreddit(sub_name)
@@ -131,7 +131,7 @@ class RedditFetcher:
                     print(f"    An error occurred while searching in r/{sub_name}: {e}")
                     time.sleep(5)  # Wait a bit if there's a broader issue
 
-    def fetch_top_threads(self, time_filters=['all', 'year'], limit=100):
+    def fetch_top_threads(self, time_filters=['all', 'year'], limit=100) -> None:
         """
         Fetch top posts from subreddits based on time filter.
 
@@ -151,7 +151,7 @@ class RedditFetcher:
                     print(f"    An error occurred while fetching top posts from r/{subreddit_name}: {e}")
                     time.sleep(5)
 
-    def fetch_all_data(self):
+    def fetch_all_data(self) -> list[dict]:
         """
         Main method to fetch all Reddit data.
 

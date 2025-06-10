@@ -9,14 +9,15 @@ import subprocess
 import sys
 import os
 import time
+from utils.config_manager import ConceptConfig
 
-def load_concept_config(config_path):
+def load_concept_config(config_path: str) -> ConceptConfig:
     """Load configuration from a Python file."""
     from utils import ConfigManager
     config_manager = ConfigManager(config_path)
     return config_manager.config
 
-def run_script(script_name, config_path, step_name):
+def run_script(script_name: str, config_path: str, step_name: str) -> bool:
     """Run a script with the given config and handle errors."""
     print(f"\n{'='*60}")
     print(f"STEP: {step_name}")
@@ -37,7 +38,7 @@ def run_script(script_name, config_path, step_name):
         print("Make sure all scripts are in the current directory")
         return False
 
-def check_prerequisites():
+def check_prerequisites() -> bool:
     """Check if required files and dependencies exist."""
     required_scripts = [
         'fetch_reddit_threads.py',
@@ -69,9 +70,9 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python run_analysis.py --config concept_config.py
-  python run_analysis.py --config example_finance_config.py --skip-fetch
-  python run_analysis.py --config my_config.py --steps analyze,synthesize
+    python run_analysis.py --config concept_config.py
+    python run_analysis.py --config example_finance_config.py --skip-fetch
+    python run_analysis.py --config my_config.py --steps analyze,synthesize
         """
     )
 

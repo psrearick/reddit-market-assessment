@@ -26,6 +26,10 @@ def main():
             print(f"No threads found at {threads_file}. Exiting.")
             return
 
+        if not isinstance(threads, list):
+            print(f"Invalid threads data format at {threads_file}. Expected a list of dictionaries.")
+            return
+
         # Create analyzer and run analysis
         analyzer = ThreadAnalyzer(config_manager, llm_client, settings)
         analysis_results, filtered_out_threads = analyzer.analyze_threads(threads)

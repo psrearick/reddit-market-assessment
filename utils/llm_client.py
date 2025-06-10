@@ -4,17 +4,19 @@ import requests
 import time
 import json
 
+from utils.settings import Settings
+
 
 class LLMClient:
     """Handles communication with LLM APIs."""
 
-    def __init__(self, settings):
+    def __init__(self, settings: 'Settings'):
         """Initialize with settings."""
         self.settings = settings
         if not self.settings.openrouter_api_key:
             raise ValueError("OPENROUTER_API_KEY not found in settings.")
 
-    def call_api(self, messages, model, response_format=None, timeout=None):
+    def call_api(self, messages: list[dict], model: str, response_format: str = "json_object", timeout: float | None = None) -> str | None:
         """
         Send a request to the OpenRouter API.
 
@@ -57,7 +59,7 @@ class LLMClient:
             print(f"Unexpected API response format")
             return None
 
-    def call_with_json_response(self, messages, model, timeout=None):
+    def call_with_json_response(self, messages: list[dict], model: str, timeout: float | None = None) -> dict | None:
         """
         Call API expecting a JSON response and parse it.
 

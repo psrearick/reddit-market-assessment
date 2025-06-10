@@ -5,14 +5,15 @@ Test script to validate configuration loading and basic functionality.
 
 import os
 import sys
+from utils.config_manager import ConceptConfig
 
-def load_concept_config(config_path):
+def load_concept_config(config_path : str) -> ConceptConfig:
     """Load configuration from a Python file."""
     from utils import ConfigManager
     config_manager = ConfigManager(config_path)
     return config_manager.config
 
-def test_config(config_path):
+def test_config(config_path : str) -> bool:
     """Test that a configuration file is valid."""
     print(f"\n{'='*60}")
     print(f"Testing configuration: {config_path}")

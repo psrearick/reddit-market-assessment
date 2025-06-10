@@ -1,13 +1,13 @@
 """Reddit thread analysis using LLM."""
 
 import time
-from utils import TextProcessor
+from utils import TextProcessor, ConfigManager, Settings, LLMClient
 
 
 class ThreadAnalyzer:
     """Handles LLM-based analysis of Reddit threads."""
 
-    def __init__(self, config_manager, llm_client, settings):
+    def __init__(self, config_manager: ConfigManager, llm_client: LLMClient, settings: Settings):
         """
         Initialize the thread analyzer.
 
@@ -21,7 +21,7 @@ class ThreadAnalyzer:
         self.settings = settings
         self.text_processor = TextProcessor()
 
-    def build_thread_context(self, thread_object):
+    def build_thread_context(self, thread_object : dict) -> str:
         """
         Build a single string from a thread object with nested comments,
         using indentation to show hierarchy.
@@ -36,7 +36,7 @@ class ThreadAnalyzer:
         context += f"POST BODY: {thread_object.get('selftext', '[no body]')}\n\n--- COMMENTS ---\n\n"
 
         # Helper function to recursively process comments
-        def append_comments_recursive(comments_list, indent_level):
+        def append_comments_recursive(comments_list: list[dict], indent_level: int = 0):
             nonlocal context
             indent = "    " * indent_level  # 4 spaces per indent level
             for comment in comments_list:
@@ -50,7 +50,7 @@ class ThreadAnalyzer:
         append_comments_recursive(thread_object.get('comments', []), 0)
         return context
 
-    def filter_threads(self, threads):
+    def filter_threads(self, threads : list[dict]) -> tuple[list[dict], list[dict]]:
         """
         Filter threads using a fast, cheap model.
 
@@ -93,7 +93,7 @@ class ThreadAnalyzer:
         print(f"\nFiltering complete. Found {len(relevant_threads)} potentially relevant threads.")
         return relevant_threads, irrelevant_threads
 
-    def analyze_relevant_threads(self, relevant_threads):
+    def analyze_relevant_threads(self, relevant_threads : list[dict]) -> list[dict]:
         """
         Perform deep analysis on relevant threads.
 
@@ -129,6 +129,17 @@ class ThreadAnalyzer:
             # Use JSON mode for models that support it
             analysis_json = self.llm.call_with_json_response(prompt_messages, self.settings.analysis_model)
 
+            if analysis_json is None:
+                print("  -> FAILED: No response from LLM.")
+                final_analysis_results.append({
+                    "post_id": thread.get('id'),
+                    "post_title": thread.get('title'),
+                    "permalink": thread.get('permalink'),
+                    "analysis_error": "No response from LLM",
+                    "raw_response": None
+                })
+                continue
+
             if "error" not in analysis_json:
                 final_analysis_results.append({
                     "post_id": thread.get('id'),
@@ -151,7 +162,7 @@ class ThreadAnalyzer:
 
         return final_analysis_results
 
-    def analyze_threads(self, threads):
+    def analyze_threads(self, threads : list[dict]) -> tuple[list[dict], list[dict]]:
         """
         Main analysis pipeline.
 
