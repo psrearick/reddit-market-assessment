@@ -5,18 +5,41 @@ import json
 import re
 import time
 from praw.models import Comment
+import argparse
+import importlib.util
 
-TARGET_SUBREDDITS = ['AgingParents', 'Caregivers', 'CaregiverSupport', 'TechSupport']
-KEYWORDS = ['tech help', 'computer problems', 'internet safety', 'scam',
-            'digital literacy', 'teaching parents', 'grandparents tech',
-            'elderly tech', 'zoom help', 'phishing', 'online security',
-            'social media safety', 'digital skills', 'senior tech',
-            'elderly computer']
+# Load concept configuration
+def load_concept_config(config_path):
+    """Load configuration from a Python file."""
+    spec = importlib.util.spec_from_file_location("concept_config", config_path)
+    if spec is None:
+        raise ImportError(f"Could not load config from {config_path}")
+    config = importlib.util.module_from_spec(spec)
+    if spec.loader is None:
+        raise ImportError(f"Could not get loader for {config_path}")
+    spec.loader.exec_module(config)
+    return config
+
+# Parse command line arguments
+parser = argparse.ArgumentParser(description='Fetch Reddit threads for market research')
+parser.add_argument('--config', default='concept_config.py',
+                   help='Path to concept configuration file (default: concept_config.py)')
+args = parser.parse_args()
+
+# Load configuration
+config = load_concept_config(args.config)
+
+# Configuration from concept file
+TARGET_SUBREDDITS = config.TARGET_SUBREDDITS
+KEYWORDS = config.KEYWORDS
+OUTPUT_FILE_PREFIX = config.OUTPUT_FILE_PREFIX
+
+# Default settings (not concept-specific)
 POST_LIMIT_PER_QUERY = 150 # Number of posts to fetch for each keyword in each subreddit
 COMMENT_LIMIT_PER_POST = 50 # Max number of comments to fetch for each post
 MAX_REPLIES_PER_COMMENT = 10 # Max replies to fetch for each top-level comment
 REPLY_FETCH_DEPTH = 1 # How many levels of replies to fetch (1 = top-level + their direct replies)
-OUTPUT_FILE = 'reddit_threads.json'
+OUTPUT_FILE = f'{OUTPUT_FILE_PREFIX}_reddit_threads.json'
 OUTPUT_DIR = 'results'
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -171,6 +194,11 @@ class Fetcher:
 
 def main():
     load_dotenv()
+
+    print(f"Starting Reddit data collection for concept: {config.CONCEPT_NAME}")
+    print(f"Description: {config.CONCEPT_DESCRIPTION}")
+    print(f"Target subreddits: {TARGET_SUBREDDITS}")
+    print(f"Keywords: {len(KEYWORDS)} keywords")
 
     fetcher = Fetcher(
         client_id=str(os.getenv("REDDIT_CLIENT_ID")),

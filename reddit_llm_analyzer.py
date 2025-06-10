@@ -2,7 +2,30 @@ import json
 import os
 import requests
 import time
+import argparse
+import importlib.util
 from dotenv import load_dotenv
+
+# Load concept configuration
+def load_concept_config(config_path):
+    """Load configuration from a Python file."""
+    spec = importlib.util.spec_from_file_location("concept_config", config_path)
+    if spec is None:
+        raise ImportError(f"Could not load config from {config_path}")
+    config = importlib.util.module_from_spec(spec)
+    if spec.loader is None:
+        raise ImportError(f"Could not get loader for {config_path}")
+    spec.loader.exec_module(config)
+    return config
+
+# Parse command line arguments
+parser = argparse.ArgumentParser(description='Analyze Reddit threads with LLM for market research')
+parser.add_argument('--config', default='concept_config.py',
+                   help='Path to concept configuration file (default: concept_config.py)')
+args = parser.parse_args()
+
+# Load configuration
+config = load_concept_config(args.config)
 
 # --- Configuration ---
 load_dotenv()
@@ -17,8 +40,8 @@ FILTER_MODEL = "mistralai/mistral-nemo"
 # Stage 2: Powerful, more expensive model for deep analysis
 ANALYSIS_MODEL = "google/gemini-2.5-flash-preview-05-20"
 
-# File paths
-THREADS_FILE = 'reddit_threads.json'
+# File paths - using concept-specific naming
+THREADS_FILE = f'{config.OUTPUT_FILE_PREFIX}_reddit_threads.json'
 OUTPUT_DIR = 'results'
 
 # Limits
@@ -91,6 +114,8 @@ def build_thread_context(thread_object):
 
 def main():
     print("Starting LLM Analysis...")
+    print(f"Analyzing concept: {config.CONCEPT_NAME}")
+    print(f"Description: {config.CONCEPT_DESCRIPTION}")
 
     threads = load_json_data(os.path.join(OUTPUT_DIR, THREADS_FILE))
 
@@ -105,7 +130,7 @@ def main():
     relevant_threads = []
     irrelevant_threads = []
 
-    filter_system_prompt = "You are a highly efficient text classifier. Your task is to determine if a Reddit thread is relevant to the topic of teaching technology to non-tech-savvy individuals (like seniors) or the challenges faced by them or their helpers. Answer with only 'yes' or 'no'."
+    filter_system_prompt = config.FILTER_SYSTEM_PROMPT
 
     for i, thread in enumerate(threads):
         print(f"Filtering thread {i+1}/{len(threads)}: {thread.get('title', 'No Title')[:80]}...")
@@ -113,7 +138,7 @@ def main():
         # We only need the thread title and body for the initial filter to save tokens
         thread_content_for_filter = f"Title: {thread.get('title', '')}\nBody: {thread.get('selftext', '')}"
 
-        filter_user_prompt = f"Is the following Reddit thread relevant to the topic of tech challenges for seniors, digital literacy for beginners, or people helping them with technology?\n\n---\n{thread_content_for_filter}\n---"
+        filter_user_prompt = config.FILTER_USER_PROMPT_TEMPLATE.format(thread_content=thread_content_for_filter)
 
         prompt_messages = [
             {"role": "system", "content": filter_system_prompt},
@@ -132,31 +157,14 @@ def main():
         time.sleep(0.5) # Be nice to the API
 
     print(f"\nFiltering complete. Found {len(relevant_threads)} potentially relevant threads.")
-    with open(os.path.join(OUTPUT_DIR, 'filtered_out_threads.json'), 'w') as f:
+    with open(os.path.join(OUTPUT_DIR, f'{config.OUTPUT_FILE_PREFIX}_filtered_out_threads.json'), 'w') as f:
         json.dump(irrelevant_threads, f, indent=2)
 
     # --- STAGE 2: DEEP ANALYSIS with a Powerful Model ---
     print("\n--- STAGE 2: Deep analysis of relevant threads ---")
     final_analysis_results = []
 
-    analysis_system_prompt = "You are a market research analyst. Your goal is to extract structured insights from a Reddit thread about technology challenges for non-tech-savvy individuals. Provide your analysis in a structured JSON format."
-
-    # This prompt asks for a single JSON object, which is much more efficient.
-    analysis_user_prompt_template = """
-    Analyze the following Reddit thread (post and comments). Based on the entire context, provide a JSON object with the following keys:
-    - "main_pain_points": A list of strings, each describing a core technology-related frustration for the non-tech-savvy person.
-    - "helper_challenges": A list of strings, each describing a challenge faced by the person trying to help/teach.
-    - "emotional_tone": A string describing the overall emotional sentiment (e.g., "Frustration and anxiety", "Empathetic but stressed").
-    - "mentioned_solutions": A list of strings for any current solutions or workarounds mentioned, including their perceived flaws.
-    - "unmet_needs": A list of strings describing what users seem to be missing or wishing for in a solution.
-    - "key_tech_topics": A list of specific technologies or apps causing issues (e.g., "Zoom", "Phishing emails", "Photo sharing").
-    - "is_high_value": A boolean (true/false) indicating if this thread contains a rich, detailed discussion highly relevant to building a tech education platform.
-
-    Here is the thread:
-    ---
-    {thread_context}
-    ---
-    """
+    analysis_system_prompt = config.ANALYSIS_SYSTEM_PROMPT
 
     for i, thread in enumerate(relevant_threads):
         print(f"Analyzing thread {i+1}/{len(relevant_threads)}: {thread.get('title', 'No Title')[:80]}...")
@@ -168,9 +176,11 @@ def main():
             print(f"  -> SKIPPING: Thread context is too long ({len(thread_context)/4:.0f} tokens approx).")
             continue
 
+        analysis_user_prompt = config.ANALYSIS_USER_PROMPT_TEMPLATE.format(thread_context=thread_context)
+
         prompt_messages = [
             {"role": "system", "content": analysis_system_prompt},
-            {"role": "user", "content": analysis_user_prompt_template.format(thread_context=thread_context)}
+            {"role": "user", "content": analysis_user_prompt}
         ]
 
         # Use JSON mode for models that support it
@@ -203,9 +213,9 @@ def main():
 
         # Save progress
         if (i + 1) % 5 == 0 or (i + 1) == len(relevant_threads):
-            with open(os.path.join(OUTPUT_DIR, 'final_analysis_results.json'), 'w') as f:
+            with open(os.path.join(OUTPUT_DIR, f'{config.OUTPUT_FILE_PREFIX}_final_analysis_results.json'), 'w') as f:
                 json.dump(final_analysis_results, f, indent=2)
-            print("  -> Saved progress to final_analysis_results.json")
+            print(f"  -> Saved progress to {config.OUTPUT_FILE_PREFIX}_final_analysis_results.json")
 
     print("\nAnalysis complete!")
 

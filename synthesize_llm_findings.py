@@ -1,7 +1,30 @@
 import json
 import os
 import requests
+import argparse
+import importlib.util
 from dotenv import load_dotenv
+
+# Load concept configuration
+def load_concept_config(config_path):
+    """Load configuration from a Python file."""
+    spec = importlib.util.spec_from_file_location("concept_config", config_path)
+    if spec is None:
+        raise ImportError(f"Could not load config from {config_path}")
+    config = importlib.util.module_from_spec(spec)
+    if spec.loader is None:
+        raise ImportError(f"Could not get loader for {config_path}")
+    spec.loader.exec_module(config)
+    return config
+
+# Parse command line arguments
+parser = argparse.ArgumentParser(description='Synthesize LLM analysis results into final report')
+parser.add_argument('--config', default='concept_config.py',
+                   help='Path to concept configuration file (default: concept_config.py)')
+args = parser.parse_args()
+
+# Load configuration
+config = load_concept_config(args.config)
 
 # --- Configuration ---
 load_dotenv()
@@ -12,15 +35,14 @@ if not OPENROUTER_API_KEY:
 OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 # Use a powerful model for these complex synthesis tasks
-# SYNTHESIS_MODEL = "anthropic/claude-sonnet-4"
 SYNTHESIS_MODEL = "google/gemini-2.5-pro-preview"
 
 OUTPUT_DIR = 'results'
-# Input file from the previous script
-ANALYSIS_FILE = os.path.join(OUTPUT_DIR, 'final_analysis_results.json')
-# Output files
-THEMATIC_SUMMARY_FILE = os.path.join(OUTPUT_DIR, 'thematic_summary.json')
-FINAL_REPORT_FILE = os.path.join(OUTPUT_DIR, 'market_validation_report.md')
+# Input file from the previous script - now concept-specific
+ANALYSIS_FILE = os.path.join(OUTPUT_DIR, f'{config.OUTPUT_FILE_PREFIX}_final_analysis_results.json')
+# Output files - now concept-specific
+THEMATIC_SUMMARY_FILE = os.path.join(OUTPUT_DIR, f'{config.OUTPUT_FILE_PREFIX}_thematic_summary.json')
+FINAL_REPORT_FILE = os.path.join(OUTPUT_DIR, f'{config.OUTPUT_FILE_PREFIX}_market_validation_report.md')
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # --- Helper Functions ---
@@ -168,25 +190,8 @@ def generate_final_report(thematic_summaries):
             full_context += f"Data type: {type(summary).__name__}, Length: {len(summary) if hasattr(summary, '__len__') else 'N/A'}\n"
         full_context += "\n---\n"
 
-    system_prompt = "You are a senior market research analyst and strategist. Your task is to write a comprehensive, yet concise, market validation report for a new online learning platform. The platform aims to help tech-savvy individuals teach technology to non-tech-savvy loved ones. Use the provided thematic data to structure your report."
-
-    user_prompt = f"""
-    Based on the following thematic analysis of Reddit discussions, write a market validation report in Markdown format. The report should have the following sections:
-
-    1.  **Executive Summary:** A high-level overview of the key findings. Is there a viable market need? What is the core problem?
-    2.  **Key Pain Points for Learners (Non-Tech-Savvy Individuals):** Summarize the primary struggles of the end-users. Use the 'main_pain_points' data.
-    3.  **Key Challenges for 'Teachers' (Tech-Savvy Helpers):** Detail the frustrations and challenges faced by those trying to provide tech support. Use the 'helper_challenges' data.
-    4.  **Market Opportunity & Unmet Needs:** Analyze the gap in the market. What are people missing? What do they wish for? Use the 'unmet_needs' and 'mentioned_solutions' data to highlight why current solutions are failing.
-    5.  **Critical Technology Topics:** List the most pressing technology areas that the platform must cover to be successful. Use the 'key_tech_topics' data.
-    6.  **Strategic Recommendations:** Based on all the data, provide 2-3 actionable recommendations for the product team building this platform. What should they focus on first? What features are most critical?
-
-    Be insightful and base your conclusions directly on the data provided below.
-
-    **DATA:**
-    ---
-    {full_context}
-    ---
-    """
+    system_prompt = config.REPORT_SYSTEM_PROMPT
+    user_prompt = config.REPORT_USER_PROMPT_TEMPLATE.format(full_context=full_context)
 
     messages = [
         {"role": "system", "content": system_prompt},
@@ -200,6 +205,9 @@ def generate_final_report(thematic_summaries):
 
 def main():
     print("Starting Synthesis of LLM Analysis...")
+    print(f"Synthesizing results for concept: {config.CONCEPT_NAME}")
+    print(f"Description: {config.CONCEPT_DESCRIPTION}")
+
     analysis_data = load_json_data(ANALYSIS_FILE)
     if not analysis_data:
         return
@@ -207,12 +215,14 @@ def main():
     # Phase 0: Aggregate all the data into master lists
     aggregated_data = aggregate_data_from_analysis(analysis_data)
 
-    # Phase 1: Perform thematic analysis on each category
+    # Phase 1: Perform thematic analysis on each category from config
     thematic_summaries = {}
-    thematic_summaries['main_pain_points'] = get_thematic_summary(aggregated_data['main_pain_points'], "Learner Pain Points", "pain points for non-tech-savvy individuals")
-    thematic_summaries['helper_challenges'] = get_thematic_summary(aggregated_data['helper_challenges'], "Helper Challenges", "challenges for people teaching tech")
-    thematic_summaries['unmet_needs'] = get_thematic_summary(aggregated_data['unmet_needs'], "Unmet Needs", "features or solutions users wish they had")
-    thematic_summaries['key_tech_topics'] = get_thematic_summary(aggregated_data['key_tech_topics'], "Key Technology Topics", "specific technologies causing issues")
+    for category_key, category_info in config.ANALYSIS_CATEGORIES.items():
+        thematic_summaries[category_key] = get_thematic_summary(
+            aggregated_data[category_key],
+            category_info['name'],
+            category_info['description']
+        )
 
     # Add the non-LLM aggregated data
     thematic_summaries['high_value_threads'] = aggregated_data['high_value_threads']
@@ -222,7 +232,7 @@ def main():
         json.dump(thematic_summaries, f, indent=4)
     print(f"\nSaved thematic summary to {THEMATIC_SUMMARY_FILE}")
 
-    # Phase 2: Generate the final human-readable report
+    # Phase 2: Generate the final human-readable report using config prompts
     final_report = generate_final_report(thematic_summaries)
 
     # Save the final report as a Markdown file
