@@ -131,7 +131,7 @@ class RedditFetcher:
                     print(f"    An error occurred while searching in r/{sub_name}: {e}")
                     time.sleep(5)  # Wait a bit if there's a broader issue
 
-    def fetch_top_threads(self, time_filters=['all', 'year'], limit=100) -> None:
+    def fetch_top_threads(self, time_filters=['all', 'year']) -> None:
         """
         Fetch top posts from subreddits based on time filter.
 
@@ -144,7 +144,7 @@ class RedditFetcher:
             for time_filter in time_filters:
                 print(f"Fetching top posts from r/{subreddit_name} ({time_filter})...")
                 try:
-                    for submission in subreddit.top(time_filter=time_filter, limit=limit):
+                    for submission in subreddit.top(time_filter=time_filter, limit=self.settings.top_posts_count):
                         self.process_submission(submission, subreddit_name)
                         time.sleep(self.settings.reddit_request_delay)
                 except Exception as e:

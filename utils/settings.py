@@ -30,6 +30,7 @@ class Settings:
         self.comment_limit_per_post = int(os.getenv("COMMENT_LIMIT_PER_POST", "50"))
         self.max_replies_per_comment = int(os.getenv("MAX_REPLIES_PER_COMMENT", "10"))
         self.reply_fetch_depth = int(os.getenv("REPLY_FETCH_DEPTH", "1"))
+        self.top_posts_count = int(os.getenv("TOP_POSTS_COUNT", "100"))
 
         # Analysis limits
         self.max_comments_per_post = int(os.getenv("MAX_COMMENTS_PER_POST", "30"))
