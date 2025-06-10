@@ -1,8 +1,6 @@
 import json
 import os
 import requests
-import time
-from collections import Counter
 from dotenv import load_dotenv
 
 # --- Configuration ---
@@ -14,16 +12,16 @@ if not OPENROUTER_API_KEY:
 OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 # Use a powerful model for these complex synthesis tasks
-SYNTHESIS_MODEL = "anthropic/claude-sonnet-4"
+# SYNTHESIS_MODEL = "anthropic/claude-sonnet-4"
+SYNTHESIS_MODEL = "google/gemini-2.5-pro-preview"
 
 # Input file from the previous script
-ANALYSIS_FILE = os.path.join('optimized_llm_results', 'final_analysis_results.json')
+ANALYSIS_FILE = os.path.join('results', 'final_analysis_results.json')
 # Output files
-THEMATIC_SUMMARY_FILE = 'thematic_summary.json'
-FINAL_REPORT_FILE = 'market_validation_report.md'
+THEMATIC_SUMMARY_FILE = os.path.join('results', 'thematic_summary.json')
+FINAL_REPORT_FILE = os.path.join('results', 'market_validation_report.md')
 
 # --- Helper Functions ---
-
 def load_json_data(filepath):
     """Loads data from a JSON file."""
     try:
@@ -154,11 +152,11 @@ def generate_final_report(thematic_summaries):
     for key, summary in thematic_summaries.items():
         full_context += f"## Thematic Summary for: {key}\n\n"
         if isinstance(summary, list) and summary:
-             for theme in summary:
+            for theme in summary:
                 full_context += f"- **Theme:** {theme.get('theme_name', 'N/A')} (Count: {theme.get('count', 0)})\n"
                 full_context += f"  - Examples: {'; '.join(theme.get('example_items', []))}\n"
         elif key == 'high_value_threads':
-             full_context += f"Found {len(summary)} high-value discussion threads.\n"
+            full_context += f"Found {len(summary)} high-value discussion threads.\n"
         full_context += "\n---\n"
 
     system_prompt = "You are a senior market research analyst and strategist. Your task is to write a comprehensive, yet concise, market validation report for a new online learning platform. The platform aims to help tech-savvy individuals teach technology to non-tech-savvy loved ones. Use the provided thematic data to structure your report."
