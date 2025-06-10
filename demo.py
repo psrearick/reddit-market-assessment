@@ -20,9 +20,8 @@ def demo_concept_switching():
 
     # Show available configurations
     concepts = {
-        'concept_config.py': 'Tech Education Platform for Seniors',
-        'example_finance_config.py': 'AI-Powered Personal Finance Advisor',
-        'example_smarthome_config.py': 'Family-Focused Smart Home Automation'
+        'config/example_finance_config.py': 'AI-Powered Personal Finance Advisor',
+        'config/example_smarthome_config.py': 'Family-Focused Smart Home Automation'
     }
 
     for i, (config_file, description) in enumerate(concepts.items(), 1):
@@ -92,9 +91,8 @@ def show_file_structure():
             "synthesize_llm_findings.py - Report generation"
         ]),
         ("Configuration Examples", [
-            "concept_config.py - Tech education platform",
-            "example_finance_config.py - Personal finance app",
-            "example_smarthome_config.py - Smart home for families"
+            "config/example_finance_config.py - Personal finance app",
+            "config/example_smarthome_config.py - Smart home for families"
         ]),
         ("Utilities", [
             "test_config.py - Configuration validator",

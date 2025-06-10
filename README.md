@@ -22,6 +22,7 @@ All concept-specific elements (subreddits, keywords, analysis prompts) are exter
 
 1. Python 3.8+
 2. Required packages (install via pip):
+
    ```bash
    pip install praw python-dotenv requests
    ```
@@ -54,7 +55,7 @@ OPENROUTER_API_KEY=your_openrouter_api_key
 
 ### Step 1: Create a Concept Configuration
 
-Create a configuration file for your product concept (see `concept_config.py` for the tech education example):
+Create a configuration file for your product concept (see `example_finance_config.py` for an example):
 
 ```python
 # my_concept_config.py
@@ -141,7 +142,7 @@ Each concept configuration file should include:
 
 The repository includes example configurations:
 
-- **`concept_config.py`** - Tech education platform for seniors
+- **`example_smarthome_config.py`** - Smarthome automation platform for busy families
 - **`example_finance_config.py`** - AI-powered personal finance advisor
 
 ## Customization Tips

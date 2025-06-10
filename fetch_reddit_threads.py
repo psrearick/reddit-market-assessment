@@ -23,7 +23,7 @@ def load_concept_config(config_path):
 # Parse command line arguments
 parser = argparse.ArgumentParser(description='Fetch Reddit threads for market research')
 parser.add_argument('--config', default='concept_config.py',
-                   help='Path to concept configuration file (default: concept_config.py)')
+                    help='Path to concept configuration file (default: concept_config.py)')
 args = parser.parse_args()
 
 # Load configuration

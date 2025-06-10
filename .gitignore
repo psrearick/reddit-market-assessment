@@ -6,11 +6,12 @@ __pycache__/
 *.egg-info
 dist/
 build/
-venv/
+.venv/
 *.log
 *.code-workspace
-scratch_files
+scratch_files/
 ai_prompt.txt
 ai_prompt_condensed.txt
 submissions_data.json
-results
+results/
+temp/
