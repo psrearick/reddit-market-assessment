@@ -1,22 +1,22 @@
 """Reddit thread analysis using LLM."""
 
 import time
-from utils import TextProcessor, ConfigManager, Settings, LLMClient
+from utils import TextProcessor, Config, Settings, LLMClient
 
 
 class ThreadAnalyzer:
     """Handles LLM-based analysis of Reddit threads."""
 
-    def __init__(self, config_manager: ConfigManager, llm_client: LLMClient, settings: Settings):
+    def __init__(self, config: Config, llm_client: LLMClient, settings: Settings):
         """
         Initialize the thread analyzer.
 
         Args:
-            config_manager: ConfigManager instance
+            config: Config instance
             llm_client: LLMClient instance
             settings: Settings instance
         """
-        self.config = config_manager
+        self.config = config
         self.llm = llm_client
         self.settings = settings
         self.text_processor = TextProcessor()
@@ -70,12 +70,12 @@ class ThreadAnalyzer:
             # We only need the thread title and body for the initial filter to save tokens
             thread_content_for_filter = f"Title: {thread.get('title', '')}\nBody: {thread.get('selftext', '')}"
 
-            filter_user_prompt = self.config.config.filter_user_prompt_template.format(
+            filter_user_prompt = self.config.filter_user_prompt_template.format(
                 thread_content=thread_content_for_filter
             )
 
             prompt_messages = [
-                {"role": "system", "content": self.config.config.filter_system_prompt},
+                {"role": "system", "content": self.config.filter_system_prompt},
                 {"role": "user", "content": filter_user_prompt}
             ]
 
@@ -117,12 +117,12 @@ class ThreadAnalyzer:
                 print(f"  -> SKIPPING: Thread context is too long ({estimated_tokens} tokens approx).")
                 continue
 
-            analysis_user_prompt = self.config.config.analysis_user_prompt_template.format(
+            analysis_user_prompt = self.config.analysis_user_prompt_template.format(
                 thread_context=thread_context
             )
 
             prompt_messages = [
-                {"role": "system", "content": self.config.config.analysis_system_prompt},
+                {"role": "system", "content": self.config.analysis_system_prompt},
                 {"role": "user", "content": analysis_user_prompt}
             ]
 

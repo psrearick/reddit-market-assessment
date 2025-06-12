@@ -21,7 +21,7 @@ class Settings:
         self.openrouter_api_url = "https://openrouter.ai/api/v1/chat/completions"
 
         # Model configurations
-        self.filter_model = os.getenv("ANALYSIS_FILTER_MODEL", "mistralai/mistral-nemo")
+        self.filter_model = os.getenv("FILTER_MODEL", "mistralai/mistral-nemo")
         self.analysis_model = os.getenv("ANALYSIS_MODEL", "gpt-4o-mini")
         self.synthesis_model = os.getenv("SYNTHESIS_MODEL", "gpt-4o-mini")
 
@@ -44,6 +44,12 @@ class Settings:
         # Reddit request settings
         self.reddit_request_delay = float(os.getenv("REDDIT_REQUEST_DELAY", "0.25"))
         self.reddit_more_comments_limit = int(os.getenv("REDDIT_MORE_COMMENTS_LIMIT", "10"))
+
+        # Paths
+        self.output_dir = os.getenv("OUTPUT_DIR", "output")
+        self.config_dir = os.getenv("CONFIG_DIR", "configs")
+        os.makedirs(self.output_dir, exist_ok=True)
+        os.makedirs(self.config_dir, exist_ok=True)
 
     def validate_required_settings(self) -> bool:
         """Validate that all required settings are present."""

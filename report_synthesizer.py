@@ -1,12 +1,12 @@
 """Report synthesis from LLM analysis results."""
 
-from utils import FileManager, ConfigManager, LLMClient
+from utils import FileManager, Config, LLMClient
 
 
 class ReportSynthesizer:
     """Handles synthesis of analysis results into final reports."""
 
-    def __init__(self, config_manager : ConfigManager, llm_client: LLMClient):
+    def __init__(self, config : Config, llm_client: LLMClient):
         """
         Initialize the report synthesizer.
 
@@ -14,7 +14,7 @@ class ReportSynthesizer:
             config_manager: ConfigManager instance
             llm_client: LLMClient instance
         """
-        self.config = config_manager
+        self.config = config
         self.llm = llm_client
         self.file_manager = FileManager()
 
@@ -146,8 +146,8 @@ class ReportSynthesizer:
                 full_context += f"Data type: {type(summary).__name__}, Length: {len(summary) if hasattr(summary, '__len__') else 'N/A'}\n"
             full_context += "\n---\n"
 
-        system_prompt = self.config.config.report_system_prompt
-        user_prompt = self.config.config.report_user_prompt_template.format(full_context=full_context)
+        system_prompt = self.config.report_system_prompt
+        user_prompt = self.config.report_user_prompt_template.format(full_context=full_context)
 
         messages = [
             {"role": "system", "content": system_prompt},

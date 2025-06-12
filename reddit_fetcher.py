@@ -3,13 +3,12 @@
 import praw
 import time
 from praw.models import Comment, Submission
-from utils import Settings, ConfigManager, FileManager, TextProcessor
-
+from utils import Settings, Config, FileManager, TextProcessor
 
 class RedditFetcher:
     """Handles Reddit data fetching operations."""
 
-    def __init__(self, config_manager: ConfigManager, settings: Settings):
+    def __init__(self, config: Config, settings: Settings):
         """
         Initialize the Reddit fetcher.
 
@@ -17,7 +16,7 @@ class RedditFetcher:
             config_manager: ConfigManager instance
             settings: Settings instance
         """
-        self.config = config_manager
+        self.config = config
         self.settings = settings
         self.text_processor = TextProcessor()
         self.file_manager = FileManager()

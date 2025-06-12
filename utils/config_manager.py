@@ -2,12 +2,14 @@
 
 import os
 import importlib.util
-from dataclasses import dataclass, field
-from typing import Dict, List, Any
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, List
+from dotenv import load_dotenv
 
 
 @dataclass
-class ConceptConfig:
+class Config:
     """Dataclass representing a concept configuration."""
 
     # Basic concept information
@@ -30,11 +32,15 @@ class ConceptConfig:
     report_user_prompt_template: str
 
     # File naming
+    output_dir: str
+    config_dir: str
     output_file_prefix: str
 
     @classmethod
-    def from_module(cls, module) -> 'ConceptConfig':
-        """Create a ConceptConfig from a loaded module."""
+    def from_module(cls, module) -> 'Config':
+        """Create a Config from a loaded module."""
+        load_dotenv()
+
         return cls(
             concept_name=getattr(module, 'CONCEPT_NAME', 'unknown_concept'),
             concept_description=getattr(module, 'CONCEPT_DESCRIPTION', 'No description provided'),
@@ -47,7 +53,9 @@ class ConceptConfig:
             analysis_categories=getattr(module, 'ANALYSIS_CATEGORIES', {}),
             report_system_prompt=getattr(module, 'REPORT_SYSTEM_PROMPT', ''),
             report_user_prompt_template=getattr(module, 'REPORT_USER_PROMPT_TEMPLATE', ''),
-            output_file_prefix=getattr(module, 'OUTPUT_FILE_PREFIX', 'default')
+            output_file_prefix=getattr(module, 'OUTPUT_FILE_PREFIX', 'default'),
+            output_dir=os.getenv("OUTPUT_DIR", 'results'),
+            config_dir=os.getenv("CONFIG_DIR", 'configs')
         )
 
     def validate(self) -> None:
@@ -88,6 +96,23 @@ class ConceptConfig:
         if errors:
             raise ValueError(f"Configuration validation failed:\n" + "\n".join(f"  - {error}" for error in errors))
 
+    def get_file_path(self, file_type: str) -> str:
+        """Get standardized file paths based on concept prefix."""
+
+        if file_type == 'results':
+            return self.output_dir
+
+        if file_type == 'config':
+            return self.config_dir
+
+        paths = {
+            'threads': f'{self.output_file_prefix}_reddit_threads.json',
+            'analysis': f'{self.output_file_prefix}_final_analysis_results.json',
+            'thematic': f'{self.output_file_prefix}_thematic_summary.json',
+            'report': f'{self.output_file_prefix}_market_validation_report.md',
+            'filtered_out': f'{self.output_file_prefix}_filtered_out_threads.json'
+        }
+        return os.path.join(self.output_dir, paths[file_type])
 
 class ConfigManager:
     """Manages configuration loading and file path generation."""
@@ -95,12 +120,13 @@ class ConfigManager:
     def __init__(self, config_path: str = 'concept_config.py'):
         """Initialize with a configuration file path."""
         self.config = self._load_config(config_path)
-        self.output_dir = os.getenv("OUTPUT_DIR", 'results')
-        os.makedirs(self.output_dir, exist_ok=True)
+        os.makedirs(self.config.output_dir, exist_ok=True)
+        os.makedirs(self.config.config_dir, exist_ok=True)
 
-    def _load_config(self, config_path: str) -> ConceptConfig:
-        """Load configuration from a Python file and return as ConceptConfig dataclass."""
-        spec = importlib.util.spec_from_file_location("concept_config", config_path)
+    def _load_config(self, config_name: str) -> Config:
+        """Load configuration from a Python file and return as Config dataclass."""
+        config_path = Path(self.config.config_dir) / f"{config_name}.py"
+        spec = importlib.util.spec_from_file_location(config_name, config_path)
         if spec is None:
             raise ImportError(f"Could not load config from {config_path}")
         module = importlib.util.module_from_spec(spec)
@@ -109,45 +135,9 @@ class ConfigManager:
         spec.loader.exec_module(module)
 
         # Convert module to dataclass
-        config = ConceptConfig.from_module(module)
+        config = Config.from_module(module)
 
         # Validate the configuration
         config.validate()
 
         return config
-
-    def get_file_path(self, file_type: str) -> str:
-        """Get standardized file paths based on concept prefix."""
-        paths = {
-            'threads': f'{self.config.output_file_prefix}_reddit_threads.json',
-            'analysis': f'{self.config.output_file_prefix}_final_analysis_results.json',
-            'thematic': f'{self.config.output_file_prefix}_thematic_summary.json',
-            'report': f'{self.config.output_file_prefix}_market_validation_report.md',
-            'filtered_out': f'{self.config.output_file_prefix}_filtered_out_threads.json'
-        }
-        return os.path.join(self.output_dir, paths[file_type])
-
-    @property
-    def concept_name(self) -> str:
-        """Get the concept name from config."""
-        return self.config.concept_name
-
-    @property
-    def concept_description(self) -> str:
-        """Get the concept description from config."""
-        return self.config.concept_description
-
-    @property
-    def target_subreddits(self) -> List[str]:
-        """Get target subreddits from config."""
-        return self.config.target_subreddits
-
-    @property
-    def keywords(self) -> List[str]:
-        """Get keywords from config."""
-        return self.config.keywords
-
-    @property
-    def analysis_categories(self) -> Dict[str, Dict[str, str]]:
-        """Get analysis categories from config."""
-        return self.config.analysis_categories
