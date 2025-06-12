@@ -9,6 +9,7 @@ import sys
 from dotenv import load_dotenv
 
 OUTPUT_DIR = os.getenv("OUTPUT_DIR", 'results')
+CONFIG_DIR = os.getenv("CONFIG_DIR", 'config')
 
 def demo_concept_switching():
     """Demonstrate how easy it is to switch between different product concepts."""
@@ -23,8 +24,8 @@ def demo_concept_switching():
 
     # Show available configurations
     concepts = {
-        'config/example_finance_config.py': 'AI-Powered Personal Finance Advisor',
-        'config/example_smarthome_config.py': 'Family-Focused Smart Home Automation'
+        f'{CONFIG_DIR}/example_finance_config.py': 'AI-Powered Personal Finance Advisor',
+        f'{CONFIG_DIR}/example_smarthome_config.py': 'Family-Focused Smart Home Automation'
     }
 
     for i, (config_file, description) in enumerate(concepts.items(), 1):
@@ -89,9 +90,6 @@ def show_file_structure():
     files = [
         ("Core Scripts", [
             "run_analysis.py - Main pipeline runner",
-            "fetch_reddit_threads.py - Data collection",
-            "reddit_llm_analyzer.py - LLM analysis",
-            "synthesize_llm_findings.py - Report generation"
         ]),
         ("Configuration Examples", [
             "config/example_finance_config.py - Personal finance app",

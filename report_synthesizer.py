@@ -11,7 +11,7 @@ class ReportSynthesizer:
         Initialize the report synthesizer.
 
         Args:
-            config_manager: ConfigManager instance
+            config: Config instance
             llm_client: LLMClient instance
         """
         self.config = config

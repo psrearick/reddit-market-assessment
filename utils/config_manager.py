@@ -123,10 +123,9 @@ class ConfigManager:
         os.makedirs(self.config.output_dir, exist_ok=True)
         os.makedirs(self.config.config_dir, exist_ok=True)
 
-    def _load_config(self, config_name: str) -> Config:
+    def _load_config(self, config_path: str) -> Config:
         """Load configuration from a Python file and return as Config dataclass."""
-        config_path = Path(self.config.config_dir) / f"{config_name}.py"
-        spec = importlib.util.spec_from_file_location(config_name, config_path)
+        spec = importlib.util.spec_from_file_location(os.path.basename(config_path), config_path)
         if spec is None:
             raise ImportError(f"Could not load config from {config_path}")
         module = importlib.util.module_from_spec(spec)

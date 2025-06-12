@@ -5,11 +5,10 @@ Test script to validate configuration loading and basic functionality.
 
 import os
 import sys
-from utils import Config
+from utils import Config, ConfigManager
 
 def load_concept_config(config_path : str) -> Config:
     """Load configuration from a Python file."""
-    from utils import ConfigManager
     config_manager = ConfigManager(config_path)
     return config_manager.config
 
@@ -54,9 +53,9 @@ def test_config(config_path : str) -> bool:
 
         # Test prompt templates
         try:
-            test_format = config.filter_user_prompt_template.format(thread_content="test")
-            test_format = config.analysis_user_prompt_template.format(thread_context="test")
-            test_format = config.report_user_prompt_template.format(full_context="test")
+            config.filter_user_prompt_template.format(thread_content="test")
+            config.analysis_user_prompt_template.format(thread_context="test")
+            config.report_user_prompt_template.format(full_context="test")
             print("Prompt templates are valid")
         except KeyError as e:
             print(f"Invalid prompt template: missing {e}")

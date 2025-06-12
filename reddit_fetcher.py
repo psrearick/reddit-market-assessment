@@ -13,7 +13,7 @@ class RedditFetcher:
         Initialize the Reddit fetcher.
 
         Args:
-            config_manager: ConfigManager instance
+            config: Config instance
             settings: Settings instance
         """
         self.config = config
