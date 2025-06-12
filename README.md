@@ -349,3 +349,7 @@ To add new analysis categories:
 1. Update your config file's `ANALYSIS_CATEGORIES` section
 2. Modify the `ANALYSIS_USER_PROMPT_TEMPLATE` to extract the new data
 3. Update the `REPORT_USER_PROMPT_TEMPLATE` to include the new insights in reports
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
