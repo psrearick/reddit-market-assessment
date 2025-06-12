@@ -34,7 +34,9 @@ class Settings:
 
         # Analysis limits
         self.max_comments_per_post = int(os.getenv("MAX_COMMENTS_PER_POST", "30"))
-        self.max_tokens_for_analysis = int(os.getenv("MAX_TOKENS_FOR_ANALYSIS", "16000"))
+        self.max_tokens_for_analysis = int(
+            os.getenv("MAX_TOKENS_FOR_ANALYSIS", "16000")
+        )
 
         # API settings
         self.api_timeout = int(os.getenv("API_TIMEOUT", "180"))
@@ -43,7 +45,9 @@ class Settings:
 
         # Reddit request settings
         self.reddit_request_delay = float(os.getenv("REDDIT_REQUEST_DELAY", "0.25"))
-        self.reddit_more_comments_limit = int(os.getenv("REDDIT_MORE_COMMENTS_LIMIT", "10"))
+        self.reddit_more_comments_limit = int(
+            os.getenv("REDDIT_MORE_COMMENTS_LIMIT", "10")
+        )
 
         # Paths
         self.output_dir = os.getenv("OUTPUT_DIR", "output")
@@ -54,10 +58,10 @@ class Settings:
     def validate_required_settings(self) -> bool:
         """Validate that all required settings are present."""
         required_settings = [
-            ('OPENROUTER_API_KEY', self.openrouter_api_key),
-            ('REDDIT_CLIENT_ID', self.reddit_client_id),
-            ('REDDIT_CLIENT_SECRET', self.reddit_client_secret),
-            ('REDDIT_USER_AGENT', self.reddit_user_agent),
+            ("OPENROUTER_API_KEY", self.openrouter_api_key),
+            ("REDDIT_CLIENT_ID", self.reddit_client_id),
+            ("REDDIT_CLIENT_SECRET", self.reddit_client_secret),
+            ("REDDIT_USER_AGENT", self.reddit_user_agent),
         ]
 
         missing = []
@@ -66,6 +70,8 @@ class Settings:
                 missing.append(name)
 
         if missing:
-            raise ValueError(f"Missing required environment variables: {', '.join(missing)}")
+            raise ValueError(
+                f"Missing required environment variables: {', '.join(missing)}"
+            )
 
         return True

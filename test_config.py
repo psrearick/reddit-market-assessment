@@ -7,16 +7,18 @@ import os
 import sys
 from utils import Config, ConfigManager
 
-def load_concept_config(config_path : str) -> Config:
+
+def load_concept_config(config_path: str) -> Config:
     """Load configuration from a Python file."""
     config_manager = ConfigManager(config_path)
     return config_manager.config
 
-def test_config(config_path : str) -> bool:
+
+def test_config(config_path: str) -> bool:
     """Test that a configuration file is valid."""
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"Testing configuration: {config_path}")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
     if not os.path.exists(config_path):
         print(f"Config file not found: {config_path}")
@@ -27,11 +29,18 @@ def test_config(config_path : str) -> bool:
 
         # Check required attributes
         required_attrs = [
-            'concept_name', 'concept_description', 'target_subreddits', 'keywords',
-            'filter_system_prompt', 'filter_user_prompt_template',
-            'analysis_system_prompt', 'analysis_user_prompt_template',
-            'analysis_categories', 'report_system_prompt', 'report_user_prompt_template',
-            'output_file_prefix'
+            "concept_name",
+            "concept_description",
+            "target_subreddits",
+            "keywords",
+            "filter_system_prompt",
+            "filter_user_prompt_template",
+            "analysis_system_prompt",
+            "analysis_user_prompt_template",
+            "analysis_categories",
+            "report_system_prompt",
+            "report_user_prompt_template",
+            "output_file_prefix",
         ]
 
         missing_attrs = []
@@ -59,27 +68,29 @@ def test_config(config_path : str) -> bool:
             print("Prompt templates are valid")
         except KeyError as e:
             print(f"Invalid prompt template: missing {e}")
-            print(f"{'='*60}")
+            print(f"{'=' * 60}")
             return False
 
         print("Configuration is valid!")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
         return True
 
     except Exception as e:
         print(f"Error loading configuration: {e}")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
         return False
+
 
 def main():
     """Test all available configurations."""
     # Find all config files automatically
     import glob
-    configs_to_test = glob.glob('config/*_config.py')
+
+    configs_to_test = glob.glob("config/*_config.py")
     configs_to_test = list(set(configs_to_test))  # Remove duplicates
 
     # Filter out test scripts and other non-config files
-    configs_to_test = [f for f in configs_to_test if not f.startswith('test_')]
+    configs_to_test = [f for f in configs_to_test if not f.startswith("test_")]
     configs_to_test.sort()
 
     print("Testing configuration files...\n")
@@ -98,12 +109,16 @@ def main():
         print("All configuration tests passed!")
 
         # Test the runner script help
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print("Testing runner script accessibility...")
         import subprocess
+
         try:
-            result = subprocess.run([sys.executable, 'run_analysis.py', '--help'],
-                                    capture_output=True, text=True)
+            result = subprocess.run(
+                [sys.executable, "run_analysis.py", "--help"],
+                capture_output=True,
+                text=True,
+            )
             if result.returncode == 0:
                 print("Runner script is accessible")
             else:
@@ -114,6 +129,7 @@ def main():
     else:
         print("Some configuration tests failed!")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

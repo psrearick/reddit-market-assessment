@@ -21,7 +21,7 @@ class ThreadAnalyzer:
         self.settings = settings
         self.text_processor = TextProcessor()
 
-    def build_thread_context(self, thread_object : dict) -> str:
+    def build_thread_context(self, thread_object: dict) -> str:
         """
         Build a single string from a thread object with nested comments,
         using indentation to show hierarchy.
@@ -43,14 +43,14 @@ class ThreadAnalyzer:
                 context += f"{indent}Comment (Score: {comment.get('score', 0)}):\n"
                 context += f"{indent}{comment.get('body', '')}\n{indent}---\n"
                 # If there are replies, recurse
-                if comment.get('replies'):
-                    append_comments_recursive(comment['replies'], indent_level + 1)
+                if comment.get("replies"):
+                    append_comments_recursive(comment["replies"], indent_level + 1)
 
         # Start the recursion on the top-level comments
-        append_comments_recursive(thread_object.get('comments', []), 0)
+        append_comments_recursive(thread_object.get("comments", []), 0)
         return context
 
-    def filter_threads(self, threads : list[dict]) -> tuple[list[dict], list[dict]]:
+    def filter_threads(self, threads: list[dict]) -> tuple[list[dict], list[dict]]:
         """
         Filter threads using a fast, cheap model.
 
@@ -65,10 +65,14 @@ class ThreadAnalyzer:
         irrelevant_threads = []
 
         for i, thread in enumerate(threads):
-            print(f"Filtering thread {i+1}/{len(threads)}: {thread.get('title', 'No Title')[:80]}...")
+            print(
+                f"Filtering thread {i + 1}/{len(threads)}: {thread.get('title', 'No Title')[:80]}..."
+            )
 
             # We only need the thread title and body for the initial filter to save tokens
-            thread_content_for_filter = f"Title: {thread.get('title', '')}\nBody: {thread.get('selftext', '')}"
+            thread_content_for_filter = (
+                f"Title: {thread.get('title', '')}\nBody: {thread.get('selftext', '')}"
+            )
 
             filter_user_prompt = self.config.filter_user_prompt_template.format(
                 thread_content=thread_content_for_filter
@@ -76,12 +80,12 @@ class ThreadAnalyzer:
 
             prompt_messages = [
                 {"role": "system", "content": self.config.filter_system_prompt},
-                {"role": "user", "content": filter_user_prompt}
+                {"role": "user", "content": filter_user_prompt},
             ]
 
             response = self.llm.call_api(prompt_messages, self.settings.filter_model)
 
-            if response and 'yes' in response.lower():
+            if response and "yes" in response.lower():
                 relevant_threads.append(thread)
                 print("  -> RELEVANT")
             else:
@@ -90,10 +94,12 @@ class ThreadAnalyzer:
 
             time.sleep(self.settings.rate_limit_delay)
 
-        print(f"\nFiltering complete. Found {len(relevant_threads)} potentially relevant threads.")
+        print(
+            f"\nFiltering complete. Found {len(relevant_threads)} potentially relevant threads."
+        )
         return relevant_threads, irrelevant_threads
 
-    def analyze_relevant_threads(self, relevant_threads : list[dict]) -> list[dict]:
+    def analyze_relevant_threads(self, relevant_threads: list[dict]) -> list[dict]:
         """
         Perform deep analysis on relevant threads.
 
@@ -107,14 +113,18 @@ class ThreadAnalyzer:
         final_analysis_results = []
 
         for i, thread in enumerate(relevant_threads):
-            print(f"Analyzing thread {i+1}/{len(relevant_threads)}: {thread.get('title', 'No Title')[:80]}...")
+            print(
+                f"Analyzing thread {i + 1}/{len(relevant_threads)}: {thread.get('title', 'No Title')[:80]}..."
+            )
 
             thread_context = self.build_thread_context(thread)
 
             # Simple token check to avoid API errors
             estimated_tokens = self.text_processor.estimate_token_count(thread_context)
             if estimated_tokens > self.settings.max_tokens_for_analysis:
-                print(f"  -> SKIPPING: Thread context is too long ({estimated_tokens} tokens approx).")
+                print(
+                    f"  -> SKIPPING: Thread context is too long ({estimated_tokens} tokens approx)."
+                )
                 continue
 
             analysis_user_prompt = self.config.analysis_user_prompt_template.format(
@@ -123,46 +133,54 @@ class ThreadAnalyzer:
 
             prompt_messages = [
                 {"role": "system", "content": self.config.analysis_system_prompt},
-                {"role": "user", "content": analysis_user_prompt}
+                {"role": "user", "content": analysis_user_prompt},
             ]
 
             # Use JSON mode for models that support it
-            analysis_json = self.llm.call_with_json_response(prompt_messages, self.settings.analysis_model)
+            analysis_json = self.llm.call_with_json_response(
+                prompt_messages, self.settings.analysis_model
+            )
 
             if analysis_json is None:
                 print("  -> FAILED: No response from LLM.")
-                final_analysis_results.append({
-                    "post_id": thread.get('id'),
-                    "post_title": thread.get('title'),
-                    "permalink": thread.get('permalink'),
-                    "analysis_error": "No response from LLM",
-                    "raw_response": None
-                })
+                final_analysis_results.append(
+                    {
+                        "post_id": thread.get("id"),
+                        "post_title": thread.get("title"),
+                        "permalink": thread.get("permalink"),
+                        "analysis_error": "No response from LLM",
+                        "raw_response": None,
+                    }
+                )
                 continue
 
             if "error" not in analysis_json:
-                final_analysis_results.append({
-                    "post_id": thread.get('id'),
-                    "post_title": thread.get('title'),
-                    "permalink": thread.get('permalink'),
-                    "analysis": analysis_json
-                })
+                final_analysis_results.append(
+                    {
+                        "post_id": thread.get("id"),
+                        "post_title": thread.get("title"),
+                        "permalink": thread.get("permalink"),
+                        "analysis": analysis_json,
+                    }
+                )
                 print("  -> Analysis successful.")
             else:
                 print(f"  -> FAILED: {analysis_json.get('error', 'Unknown error')}")
-                final_analysis_results.append({
-                    "post_id": thread.get('id'),
-                    "post_title": thread.get('title'),
-                    "permalink": thread.get('permalink'),
-                    "analysis_error": analysis_json.get('error'),
-                    "raw_response": analysis_json.get('raw_response')
-                })
+                final_analysis_results.append(
+                    {
+                        "post_id": thread.get("id"),
+                        "post_title": thread.get("title"),
+                        "permalink": thread.get("permalink"),
+                        "analysis_error": analysis_json.get("error"),
+                        "raw_response": analysis_json.get("raw_response"),
+                    }
+                )
 
             time.sleep(1)
 
         return final_analysis_results
 
-    def analyze_threads(self, threads : list[dict]) -> tuple[list[dict], list[dict]]:
+    def analyze_threads(self, threads: list[dict]) -> tuple[list[dict], list[dict]]:
         """
         Main analysis pipeline.
 

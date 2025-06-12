@@ -3,24 +3,38 @@
 
 # === CONCEPT DEFINITION ===
 CONCEPT_NAME = "ai_finance_advisor"
-CONCEPT_DESCRIPTION = "AI-powered personal finance advisor app for millennials and Gen Z users"
+CONCEPT_DESCRIPTION = (
+    "AI-powered personal finance advisor app for millennials and Gen Z users"
+)
 
 # === REDDIT DATA COLLECTION ===
 TARGET_SUBREDDITS = [
-    'personalfinance',
-    'financialindependence',
-    'budgets',
-    'millennials',
-    'povertyfinance',
-    'investing',
-    'StudentLoans'
+    "personalfinance",
+    "financialindependence",
+    "budgets",
+    "millennials",
+    "povertyfinance",
+    "investing",
+    "StudentLoans",
 ]
 
 KEYWORDS = [
-    'budgeting app', 'financial planning', 'money management', 'debt tracking',
-    'investment advice', 'savings goals', 'financial literacy', 'expense tracking',
-    'credit score', 'financial anxiety', 'money stress', 'financial advisor',
-    'budget help', 'financial app', 'money app', 'personal finance'
+    "budgeting app",
+    "financial planning",
+    "money management",
+    "debt tracking",
+    "investment advice",
+    "savings goals",
+    "financial literacy",
+    "expense tracking",
+    "credit score",
+    "financial anxiety",
+    "money stress",
+    "financial advisor",
+    "budget help",
+    "financial app",
+    "money app",
+    "personal finance",
 ]
 
 # === ANALYSIS CONFIGURATION ===
@@ -55,22 +69,22 @@ Here is the thread:
 # === SYNTHESIS CONFIGURATION ===
 # Categories for thematic analysis
 ANALYSIS_CATEGORIES = {
-    'main_pain_points': {
-        'name': "Financial Pain Points",
-        'description': "financial management frustrations and challenges"
+    "main_pain_points": {
+        "name": "Financial Pain Points",
+        "description": "financial management frustrations and challenges",
     },
-    'helper_challenges': {
-        'name': "Advisor Challenges",
-        'description': "challenges for people providing financial guidance"
+    "helper_challenges": {
+        "name": "Advisor Challenges",
+        "description": "challenges for people providing financial guidance",
     },
-    'unmet_needs': {
-        'name': "Unmet Financial Needs",
-        'description': "features or financial services users wish they had"
+    "unmet_needs": {
+        "name": "Unmet Financial Needs",
+        "description": "features or financial services users wish they had",
     },
-    'key_tech_topics': {
-        'name': "Financial Technology Topics",
-        'description': "specific financial tools and apps mentioned"
-    }
+    "key_tech_topics": {
+        "name": "Financial Technology Topics",
+        "description": "specific financial tools and apps mentioned",
+    },
 }
 
 # Report generation prompt

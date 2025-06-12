@@ -8,7 +8,7 @@ class FileManager:
     """Handles file operations for the framework."""
 
     @staticmethod
-    def load_json(filepath: str) -> dict|list|None:
+    def load_json(filepath: str) -> dict | list | None:
         """
         Load JSON data from a file with error handling.
 
@@ -19,7 +19,7 @@ class FileManager:
             Loaded data or None if failed
         """
         try:
-            with open(filepath, 'r', encoding='utf-8') as f:
+            with open(filepath, "r", encoding="utf-8") as f:
                 return json.load(f)
         except (FileNotFoundError, json.JSONDecodeError) as e:
             print(f"Error loading {filepath}: {e}")
@@ -35,7 +35,7 @@ class FileManager:
             filepath: Destination file path
         """
         os.makedirs(os.path.dirname(filepath), exist_ok=True)
-        with open(filepath, 'w', encoding='utf-8') as f:
+        with open(filepath, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=4, ensure_ascii=False)
 
     @staticmethod
@@ -48,7 +48,7 @@ class FileManager:
             filepath: Destination file path
         """
         os.makedirs(os.path.dirname(filepath), exist_ok=True)
-        with open(filepath, 'w', encoding='utf-8') as f:
+        with open(filepath, "w", encoding="utf-8") as f:
             f.write(content)
 
     @staticmethod

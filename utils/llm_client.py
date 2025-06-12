@@ -10,13 +10,19 @@ from utils.settings import Settings
 class LLMClient:
     """Handles communication with LLM APIs."""
 
-    def __init__(self, settings: 'Settings'):
+    def __init__(self, settings: "Settings"):
         """Initialize with settings."""
         self.settings = settings
         if not self.settings.openrouter_api_key:
             raise ValueError("OPENROUTER_API_KEY not found in settings.")
 
-    def call_api(self, messages: list[dict], model: str, response_format: str = "json_object", timeout: float | None = None) -> str | None:
+    def call_api(
+        self,
+        messages: list[dict],
+        model: str,
+        response_format: str = "json_object",
+        timeout: float | None = None,
+    ) -> str | None:
         """
         Send a request to the OpenRouter API.
 
@@ -43,36 +49,43 @@ class LLMClient:
                 self.settings.openrouter_api_url,
                 headers=headers,
                 json=data,
-                timeout=timeout
+                timeout=timeout,
             )
             response.raise_for_status()
-            return response.json()['choices'][0]['message']['content']
+            return response.json()["choices"][0]["message"]["content"]
 
         except requests.exceptions.RequestException as e:
             print(f"API Request failed: {e}")
-            if hasattr(e, 'response') and e.response and e.response.status_code == 429:
+            if hasattr(e, "response") and e.response and e.response.status_code == 429:
                 print("Rate limit hit. Waiting...")
                 time.sleep(60)
             return None
 
         except (KeyError, IndexError):
-            print(f"Unexpected API response format")
+            print("Unexpected API response format")
             return None
 
-    def call_with_json_response(self, messages: list[dict], model: str, timeout: float | None = None) -> dict | None:
+    def call_with_json_response(
+        self, messages: list[dict], model: str, timeout: float | None = None
+    ) -> dict | None:
         """
         Call API expecting a JSON response and parse it.
 
         Returns:
             Parsed JSON object or error dict
         """
-        response_str = self.call_api(messages, model, response_format="json_object", timeout=timeout)
+        response_str = self.call_api(
+            messages, model, response_format="json_object", timeout=timeout
+        )
 
         if response_str:
             try:
                 return json.loads(response_str)
             except json.JSONDecodeError:
-                print(f"Failed to decode JSON from LLM response.")
-                return {"error": "Failed to parse LLM response", "raw_response": response_str}
+                print("Failed to decode JSON from LLM response.")
+                return {
+                    "error": "Failed to parse LLM response",
+                    "raw_response": response_str,
+                }
 
         return {"error": "No response from LLM"}

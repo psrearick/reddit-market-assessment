@@ -5,6 +5,7 @@ import time
 from praw.models import Comment, Submission
 from utils import Settings, Config, FileManager, TextProcessor
 
+
 class RedditFetcher:
     """Handles Reddit data fetching operations."""
 
@@ -28,7 +29,7 @@ class RedditFetcher:
         return praw.Reddit(
             client_id=self.settings.reddit_client_id,
             client_secret=self.settings.reddit_client_secret,
-            user_agent=self.settings.reddit_user_agent
+            user_agent=self.settings.reddit_user_agent,
         )
 
     def fetch_replies(self, comment: Comment, current_depth: int = 0) -> list[dict]:
@@ -50,22 +51,24 @@ class RedditFetcher:
         sorted_replies = sorted(
             comment.replies.list(),
             key=lambda r: r.score if isinstance(r, Comment) else 0,
-            reverse=True
+            reverse=True,
         )
 
-        for reply in sorted_replies[:self.settings.max_replies_per_comment]:
+        for reply in sorted_replies[: self.settings.max_replies_per_comment]:
             if isinstance(reply, Comment):
-                replies_data.append({
-                    'id': reply.id,
-                    'body': reply.body,
-                    'author': str(reply.author),
-                    'score': reply.score,
-                    'created_utc': reply.created_utc,
-                    'replies': self.fetch_replies(reply, current_depth + 1)
-                })
+                replies_data.append(
+                    {
+                        "id": reply.id,
+                        "body": reply.body,
+                        "author": str(reply.author),
+                        "score": reply.score,
+                        "created_utc": reply.created_utc,
+                        "replies": self.fetch_replies(reply, current_depth + 1),
+                    }
+                )
         return replies_data
 
-    def process_submission(self, submission : Submission, sub_name: str) -> None:
+    def process_submission(self, submission: Submission, sub_name: str) -> None:
         """
         Process a single submission, fetching its comments and replies.
 
@@ -80,40 +83,42 @@ class RedditFetcher:
         comments_data = []
 
         try:
-            submission.comments.replace_more(limit=self.settings.reddit_more_comments_limit)
+            submission.comments.replace_more(
+                limit=self.settings.reddit_more_comments_limit
+            )
 
             # Sort comments by score (upvotes) to get the most relevant ones
             sorted_comments = sorted(
                 submission.comments.list(),
                 key=lambda c: c.score if isinstance(c, Comment) else 0,
-                reverse=True
+                reverse=True,
             )
 
-            for comment in sorted_comments[:self.settings.comment_limit_per_post]:
+            for comment in sorted_comments[: self.settings.comment_limit_per_post]:
                 if isinstance(comment, Comment):
                     comment_dict = {
-                        'id': comment.id,
-                        'body': comment.body,
-                        'author': str(comment.author),
-                        'score': comment.score,
-                        'created_utc': comment.created_utc,
-                        'replies': self.fetch_replies(comment, current_depth=0)
+                        "id": comment.id,
+                        "body": comment.body,
+                        "author": str(comment.author),
+                        "score": comment.score,
+                        "created_utc": comment.created_utc,
+                        "replies": self.fetch_replies(comment, current_depth=0),
                     }
                     comments_data.append(comment_dict)
         except Exception as e:
             print(f"      Error fetching comments for post {submission.id}: {e}")
 
         self.all_threads[submission.id] = {
-            'id': submission.id,
-            'title': submission.title,
-            'selftext': submission.selftext,
-            'url': submission.url,
-            'subreddit': sub_name,
-            'score': submission.score,
-            'num_comments': submission.num_comments,
-            'created_utc': submission.created_utc,
-            'permalink': f"https://reddit.com{submission.permalink}",
-            'comments': comments_data
+            "id": submission.id,
+            "title": submission.title,
+            "selftext": submission.selftext,
+            "url": submission.url,
+            "subreddit": sub_name,
+            "score": submission.score,
+            "num_comments": submission.num_comments,
+            "created_utc": submission.created_utc,
+            "permalink": f"https://reddit.com{submission.permalink}",
+            "comments": comments_data,
         }
 
     def fetch_keyword_threads(self) -> None:
@@ -123,14 +128,16 @@ class RedditFetcher:
             for keyword in self.config.keywords:
                 print(f"\nSearching for '{keyword}' in r/{sub_name}...")
                 try:
-                    for submission in subreddit.search(keyword, limit=self.settings.post_limit_per_query):
+                    for submission in subreddit.search(
+                        keyword, limit=self.settings.post_limit_per_query
+                    ):
                         self.process_submission(submission, sub_name)
                         time.sleep(self.settings.reddit_request_delay)
                 except Exception as e:
                     print(f"    An error occurred while searching in r/{sub_name}: {e}")
                     time.sleep(5)  # Wait a bit if there's a broader issue
 
-    def fetch_top_threads(self, time_filters=['all', 'year']) -> None:
+    def fetch_top_threads(self, time_filters=["all", "year"]) -> None:
         """
         Fetch top posts from subreddits based on time filter.
 
@@ -143,11 +150,15 @@ class RedditFetcher:
             for time_filter in time_filters:
                 print(f"Fetching top posts from r/{subreddit_name} ({time_filter})...")
                 try:
-                    for submission in subreddit.top(time_filter=time_filter, limit=self.settings.top_posts_count):
+                    for submission in subreddit.top(
+                        time_filter=time_filter, limit=self.settings.top_posts_count
+                    ):
                         self.process_submission(submission, subreddit_name)
                         time.sleep(self.settings.reddit_request_delay)
                 except Exception as e:
-                    print(f"    An error occurred while fetching top posts from r/{subreddit_name}: {e}")
+                    print(
+                        f"    An error occurred while fetching top posts from r/{subreddit_name}: {e}"
+                    )
                     time.sleep(5)
 
     def fetch_all_data(self) -> list[dict]:
@@ -157,7 +168,9 @@ class RedditFetcher:
         Returns:
             List of thread data dictionaries
         """
-        print(f"Starting Reddit data collection for concept: {self.config.concept_name}")
+        print(
+            f"Starting Reddit data collection for concept: {self.config.concept_name}"
+        )
         print(f"Description: {self.config.concept_description}")
         print(f"Target subreddits: {self.config.target_subreddits}")
         print(f"Keywords: {len(self.config.keywords)} keywords")

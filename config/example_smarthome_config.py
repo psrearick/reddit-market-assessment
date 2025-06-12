@@ -7,22 +7,33 @@ CONCEPT_DESCRIPTION = "Smart home automation platform designed specifically for 
 
 # === REDDIT DATA COLLECTION ===
 TARGET_SUBREDDITS = [
-    'homeautomation',
-    'smarthome',
-    'Parenting',
-    'workingmoms',
-    'daddit',
-    'HomeImprovement',
-    'amazonecho',
-    'googlehome'
+    "homeautomation",
+    "smarthome",
+    "Parenting",
+    "workingmoms",
+    "daddit",
+    "HomeImprovement",
+    "amazonecho",
+    "googlehome",
 ]
 
 KEYWORDS = [
-    'smart home kids', 'home automation family', 'smart lights children',
-    'family routines', 'morning routine automation', 'bedtime routine',
-    'chore automation', 'family schedule', 'busy parents', 'working parents',
-    'smart home security kids', 'child safety automation', 'parental controls',
-    'family organization', 'smart home overwhelmed', 'home automation complex'
+    "smart home kids",
+    "home automation family",
+    "smart lights children",
+    "family routines",
+    "morning routine automation",
+    "bedtime routine",
+    "chore automation",
+    "family schedule",
+    "busy parents",
+    "working parents",
+    "smart home security kids",
+    "child safety automation",
+    "parental controls",
+    "family organization",
+    "smart home overwhelmed",
+    "home automation complex",
 ]
 
 # === ANALYSIS CONFIGURATION ===
@@ -57,22 +68,22 @@ Here is the thread:
 # === SYNTHESIS CONFIGURATION ===
 # Categories for thematic analysis
 ANALYSIS_CATEGORIES = {
-    'main_pain_points': {
-        'name': "Family Organization Pain Points",
-        'description': "family organization, routine, and home management frustrations"
+    "main_pain_points": {
+        "name": "Family Organization Pain Points",
+        "description": "family organization, routine, and home management frustrations",
     },
-    'helper_challenges': {
-        'name': "Helper Challenges",
-        'description': "challenges for people helping families with organization or tech"
+    "helper_challenges": {
+        "name": "Helper Challenges",
+        "description": "challenges for people helping families with organization or tech",
     },
-    'unmet_needs': {
-        'name': "Unmet Family Automation Needs",
-        'description': "features or automation solutions families wish they had"
+    "unmet_needs": {
+        "name": "Unmet Family Automation Needs",
+        "description": "features or automation solutions families wish they had",
     },
-    'key_tech_topics': {
-        'name': "Smart Home Technology Topics",
-        'description': "specific smart home devices and technologies mentioned"
-    }
+    "key_tech_topics": {
+        "name": "Smart Home Technology Topics",
+        "description": "specific smart home devices and technologies mentioned",
+    },
 }
 
 # Report generation prompt

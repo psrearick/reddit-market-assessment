@@ -8,8 +8,9 @@ import os
 import sys
 from dotenv import load_dotenv
 
-OUTPUT_DIR = os.getenv("OUTPUT_DIR", 'results')
-CONFIG_DIR = os.getenv("CONFIG_DIR", 'config')
+OUTPUT_DIR = os.getenv("OUTPUT_DIR", "results")
+CONFIG_DIR = os.getenv("CONFIG_DIR", "config")
+
 
 def demo_concept_switching():
     """Demonstrate how easy it is to switch between different product concepts."""
@@ -18,14 +19,18 @@ def demo_concept_switching():
     print("=" * 60)
     print()
 
-    print("This framework allows you to analyze market potential for any product concept")
-    print("by simply creating a configuration file. Here are the example concepts included:")
+    print(
+        "This framework allows you to analyze market potential for any product concept"
+    )
+    print(
+        "by simply creating a configuration file. Here are the example concepts included:"
+    )
     print()
 
     # Show available configurations
     concepts = {
-        f'{CONFIG_DIR}/example_finance_config.py': 'AI-Powered Personal Finance Advisor',
-        f'{CONFIG_DIR}/example_smarthome_config.py': 'Family-Focused Smart Home Automation'
+        f"{CONFIG_DIR}/example_finance_config.py": "AI-Powered Personal Finance Advisor",
+        f"{CONFIG_DIR}/example_smarthome_config.py": "Family-Focused Smart Home Automation",
     }
 
     for i, (config_file, description) in enumerate(concepts.items(), 1):
@@ -36,6 +41,7 @@ def demo_concept_switching():
             # Load and show key details
             try:
                 import importlib.util
+
                 spec = importlib.util.spec_from_file_location("config", config_file)
                 if spec is not None and spec.loader is not None:
                     config = importlib.util.module_from_spec(spec)
@@ -43,7 +49,9 @@ def demo_concept_switching():
                 else:
                     raise ImportError(f"Could not load spec for {config_file}")
 
-                print(f"   Subreddits: {', '.join(config.TARGET_SUBREDDITS[:3])}{'...' if len(config.TARGET_SUBREDDITS) > 3 else ''}")
+                print(
+                    f"   Subreddits: {', '.join(config.TARGET_SUBREDDITS[:3])}{'...' if len(config.TARGET_SUBREDDITS) > 3 else ''}"
+                )
                 print(f"   Keywords: {len(config.KEYWORDS)} terms")
                 print()
             except Exception as e:
@@ -79,8 +87,11 @@ def demo_concept_switching():
     print("   python3 run_analysis.py --config concept_config.py --skip-fetch")
     print()
     print("   # Run specific steps")
-    print("   python3 run_analysis.py --config example_smarthome_config.py --steps analyze,synthesize")
+    print(
+        "   python3 run_analysis.py --config example_smarthome_config.py --steps analyze,synthesize"
+    )
     print()
+
 
 def show_file_structure():
     """Show the project file structure."""
@@ -88,41 +99,50 @@ def show_file_structure():
     print("=" * 30)
 
     files = [
-        ("Core Scripts", [
-            "run_analysis.py - Main pipeline runner",
-        ]),
-        ("Configuration Examples", [
-            "config/example_finance_config.py - Personal finance app",
-            "config/example_smarthome_config.py - Smart home for families"
-        ]),
-        ("Utilities", [
-            "test_config.py - Configuration validator",
-            "README.md - Complete documentation"
-        ]),
-        ("Output Directory", [
-            f"{OUTPUT_DIR}/ - All analysis outputs go here"
-        ])
+        (
+            "Core Scripts",
+            [
+                "run_analysis.py - Main pipeline runner",
+            ],
+        ),
+        (
+            "Configuration Examples",
+            [
+                "config/example_finance_config.py - Personal finance app",
+                "config/example_smarthome_config.py - Smart home for families",
+            ],
+        ),
+        (
+            "Utilities",
+            [
+                "test_config.py - Configuration validator",
+                "README.md - Complete documentation",
+            ],
+        ),
+        ("Output Directory", [f"{OUTPUT_DIR}/ - All analysis outputs go here"]),
     ]
 
     for category, file_list in files:
         print(f"\n{category}:")
         for file_desc in file_list:
-            filename = file_desc.split(' - ')[0]
-            desc = file_desc.split(' - ')[1] if ' - ' in file_desc else ''
+            filename = file_desc.split(" - ")[0]
+            desc = file_desc.split(" - ")[1] if " - " in file_desc else ""
             exists = "Exists:" if os.path.exists(filename) else "Missing:"
             file_desc = f"{filename} - {desc}" if desc else filename
             print(f"  {exists} {file_desc}")
 
+
 def main():
     """Main demo function."""
     load_dotenv()
-    if len(sys.argv) > 1 and sys.argv[1] == '--structure':
+    if len(sys.argv) > 1 and sys.argv[1] == "--structure":
         show_file_structure()
     else:
         demo_concept_switching()
 
     print("For complete documentation, see README.md")
     print("To test all configurations, run: python3 test_config.py")
+
 
 if __name__ == "__main__":
     main()

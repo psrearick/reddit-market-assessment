@@ -13,6 +13,7 @@ from report_synthesizer import ReportSynthesizer
 from thread_analyzer import ThreadAnalyzer
 from utils import ConfigManager, Settings, FileManager, LLMClient, Config
 
+
 class AnalysisRunner:
     """Runner class to encapsulate the analysis pipeline logic."""
 
@@ -21,9 +22,9 @@ class AnalysisRunner:
         self.settings = settings
         self.llm_client = LLMClient(settings)
         self.step_names = {
-            'fetch': 'Fetching Reddit Threads',
-            'analyze': 'Analyzing Threads with LLM',
-            'synthesize': 'Synthesizing Findings and Generating Report'
+            "fetch": "Fetching Reddit Threads",
+            "analyze": "Analyzing Threads with LLM",
+            "synthesize": "Synthesizing Findings and Generating Report",
         }
 
     def load_concept_config(self, config_path: str) -> Config:
@@ -38,7 +39,7 @@ class AnalysisRunner:
             print(f"Description: {self.config.concept_description}")
 
             # Ensure results directory exists
-            os.makedirs(self.config.get_file_path('results'), exist_ok=True)
+            os.makedirs(self.config.get_file_path("results"), exist_ok=True)
 
             return self.config
         except Exception as e:
@@ -47,9 +48,9 @@ class AnalysisRunner:
 
     def print_header(self, header: str) -> None:
         """Print a formatted header."""
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"{header.upper()}")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
     def print_step_header(self, step_name: str) -> None:
         """Print a formatted header for each step in the pipeline."""
@@ -69,20 +70,22 @@ class AnalysisRunner:
             print("No steps to run. Exiting.")
             return False
 
-        print(f"Configured steps to run: {', '.join([k for k, v in steps.items() if v])}")
+        print(
+            f"Configured steps to run: {', '.join([k for k, v in steps.items() if v])}"
+        )
 
         try:
-            if steps.get('fetch', False):
+            if steps.get("fetch", False):
                 self.fetch_step()
             else:
                 print("Skipping data fetching step as per configuration.")
 
-            if steps.get('analyze', False):
+            if steps.get("analyze", False):
                 self.analyze_step()
             else:
                 print("Skipping analysis step as per configuration.")
 
-            if steps.get('synthesize', False):
+            if steps.get("synthesize", False):
                 self.synthesize_step()
             else:
                 print("Skipping synthesis step as per configuration.")
@@ -97,14 +100,14 @@ class AnalysisRunner:
 
     def fetch_step(self) -> None:
         """Run the data fetching step to collect Reddit threads."""
-        self.print_step_header(self.step_names['fetch'])
+        self.print_step_header(self.step_names["fetch"])
         try:
             # Create Reddit fetcher and fetch data
             fetcher = RedditFetcher(self.config, self.settings)
             threads = fetcher.fetch_all_data()
 
             # Save results
-            output_file = self.config.get_file_path('threads')
+            output_file = self.config.get_file_path("threads")
             FileManager.save_json(threads, output_file)
         except Exception as e:
             print(f"Error in {self.step_names['fetch']}: {e}")
@@ -114,10 +117,10 @@ class AnalysisRunner:
 
     def analyze_step(self) -> None:
         """Run the analysis step."""
-        self.print_step_header(self.step_names['analyze'])
+        self.print_step_header(self.step_names["analyze"])
         try:
             # Load threads data
-            threads_file = self.config.get_file_path('threads')
+            threads_file = self.config.get_file_path("threads")
             threads = FileManager.load_json(threads_file)
 
             if not threads:
@@ -125,7 +128,9 @@ class AnalysisRunner:
                 return
 
             if not isinstance(threads, list):
-                print(f"Invalid threads data format at {threads_file}. Expected a list of dictionaries.")
+                print(
+                    f"Invalid threads data format at {threads_file}. Expected a list of dictionaries."
+                )
                 return
 
             # Create analyzer and run analysis
@@ -133,12 +138,12 @@ class AnalysisRunner:
             analysis_results, filtered_out_threads = analyzer.analyze_threads(threads)
 
             # Save results
-            analysis_file = self.config.get_file_path('analysis')
+            analysis_file = self.config.get_file_path("analysis")
             FileManager.save_json(analysis_results, analysis_file)
             print(f"Saved analysis results to {analysis_file}")
 
             # Save filtered out threads
-            filtered_file = self.config.get_file_path('filtered_out')
+            filtered_file = self.config.get_file_path("filtered_out")
             FileManager.save_json(filtered_out_threads, filtered_file)
             print(f"Saved filtered out threads to {filtered_file}")
         except Exception as e:
@@ -149,7 +154,7 @@ class AnalysisRunner:
 
     def synthesize_step(self) -> None:
         """Run the synthesis step to generate the final report."""
-        self.print_step_header(self.step_names['synthesize'])
+        self.print_step_header(self.step_names["synthesize"])
         llm_client = LLMClient(self.settings)
         synthesizer = ReportSynthesizer(self.config, llm_client)
         success = synthesizer.synthesize()
@@ -169,7 +174,7 @@ class AnalysisRunner:
         print(f"Thematic summary: {self.config.get_file_path('thematic')}")
 
         # Check if final report exists and show file size
-        report_path = self.config.get_file_path('report')
+        report_path = self.config.get_file_path("report")
         if not os.path.exists(report_path):
             print("Final report not found. Please check the synthesis step.")
             sys.exit(1)
@@ -182,35 +187,46 @@ class AnalysisRunner:
         print("   2. Examine the thematic summary for detailed breakdowns")
         print("   3. Consider adjusting your concept based on the findings")
 
+
 def main():
     settings = Settings()
     settings.validate_required_settings()
 
     parser = argparse.ArgumentParser(
-        description='Run complete Reddit market research analysis pipeline',
+        description="Run complete Reddit market research analysis pipeline",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
     python run_analysis.py --config my_config.py
     python run_analysis.py --config my_config.py --skip-fetch
     python run_analysis.py --config my_config.py --steps analyze,synthesize
-        """
+        """,
     )
 
-    parser.add_argument('--config', default='config/concept_config.py',
-                        help='Path to concept configuration file (default: config/concept_config.py)')
+    parser.add_argument(
+        "--config",
+        default="config/concept_config.py",
+        help="Path to concept configuration file (default: config/concept_config.py)",
+    )
 
-    parser.add_argument('--steps',
-                        help='Comma-separated list of steps to run: fetch,analyze,synthesize (default: all)')
+    parser.add_argument(
+        "--steps",
+        help="Comma-separated list of steps to run: fetch,analyze,synthesize (default: all)",
+    )
 
-    parser.add_argument('--skip-fetch', action='store_true',
-                        help='Skip data fetching step')
+    parser.add_argument(
+        "--skip-fetch", action="store_true", help="Skip data fetching step"
+    )
 
-    parser.add_argument('--skip-analyze', action='store_true',
-                        help='Skip LLM analysis step')
+    parser.add_argument(
+        "--skip-analyze", action="store_true", help="Skip LLM analysis step"
+    )
 
-    parser.add_argument('--skip-synthesize', action='store_true',
-                        help='Skip synthesis/report generation step')
+    parser.add_argument(
+        "--skip-synthesize",
+        action="store_true",
+        help="Skip synthesis/report generation step",
+    )
 
     args = parser.parse_args()
 
@@ -223,20 +239,15 @@ Examples:
     run_synthesize = not args.skip_synthesize
 
     if args.steps:
-        step_names = [s.strip().lower() for s in args.steps.split(',')]
-        run_fetch = 'fetch' in step_names
-        run_analyze = 'analyze' in step_names
-        run_synthesize = 'synthesize' in step_names
+        step_names = [s.strip().lower() for s in args.steps.split(",")]
+        run_fetch = "fetch" in step_names
+        run_analyze = "analyze" in step_names
+        run_synthesize = "synthesize" in step_names
 
-    steps = {
-        'fetch': run_fetch,
-        'analyze': run_analyze,
-        'synthesize': run_synthesize
-    }
+    steps = {"fetch": run_fetch, "analyze": run_analyze, "synthesize": run_synthesize}
 
     # Run the analysis steps
     runner.run_steps(steps)
-
 
 
 if __name__ == "__main__":

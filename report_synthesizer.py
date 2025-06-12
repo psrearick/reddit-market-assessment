@@ -6,7 +6,7 @@ from utils import FileManager, Config, LLMClient
 class ReportSynthesizer:
     """Handles synthesis of analysis results into final reports."""
 
-    def __init__(self, config : Config, llm_client: LLMClient):
+    def __init__(self, config: Config, llm_client: LLMClient):
         """
         Initialize the report synthesizer.
 
@@ -18,7 +18,7 @@ class ReportSynthesizer:
         self.llm = llm_client
         self.file_manager = FileManager()
 
-    def aggregate_data(self, analysis_data : list[dict]) -> dict:
+    def aggregate_data(self, analysis_data: list[dict]) -> dict:
         """
         Aggregate all lists from the analysis file into master lists.
 
@@ -38,7 +38,7 @@ class ReportSynthesizer:
         high_value_threads = []
 
         for item in analysis_data:
-            analysis = item.get('analysis', {})
+            analysis = item.get("analysis", {})
             # Skip items that had errors during the previous stage
             if not isinstance(analysis, dict):
                 continue
@@ -47,17 +47,19 @@ class ReportSynthesizer:
                 # Extend the master list with the list from the current item
                 aggregated[key].extend(analysis.get(key, []))
 
-            if analysis.get('is_high_value'):
-                high_value_threads.append(item.get('permalink'))
+            if analysis.get("is_high_value"):
+                high_value_threads.append(item.get("permalink"))
 
         print("Data Aggregation Complete:")
         for key, value in aggregated.items():
             print(f"  - Found {len(value)} total items for '{key}'")
 
-        aggregated['high_value_threads'] = high_value_threads
+        aggregated["high_value_threads"] = high_value_threads
         return aggregated
 
-    def perform_thematic_analysis(self, items_list: list[str], category_name: str, item_description: str) -> dict | None:
+    def perform_thematic_analysis(
+        self, items_list: list[str], category_name: str, item_description: str
+    ) -> dict | None:
         """
         Use an LLM to cluster a list of strings into themes and count them.
 
@@ -110,12 +112,14 @@ class ReportSynthesizer:
 
         messages = [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt}
+            {"role": "user", "content": user_prompt},
         ]
 
-        return self.llm.call_with_json_response(messages, self.llm.settings.synthesis_model)
+        return self.llm.call_with_json_response(
+            messages, self.llm.settings.synthesis_model
+        )
 
-    def generate_report(self, thematic_summaries : dict) -> str:
+    def generate_report(self, thematic_summaries: dict) -> str:
         """
         Use an LLM to write a final market validation report from thematic summaries.
 
@@ -138,23 +142,29 @@ class ReportSynthesizer:
                         full_context += f"  - Examples: {'; '.join(theme.get('example_items', []))}\n"
                     else:
                         full_context += f"- **Item:** {theme}\n"
-            elif key == 'high_value_threads':
+            elif key == "high_value_threads":
                 full_context += f"Found {len(summary)} high-value discussion threads.\n"
-            elif isinstance(summary, dict) and 'error' in summary:
-                full_context += f"Error processing {key}: {summary.get('error', 'Unknown error')}\n"
+            elif isinstance(summary, dict) and "error" in summary:
+                full_context += (
+                    f"Error processing {key}: {summary.get('error', 'Unknown error')}\n"
+                )
             else:
                 full_context += f"Data type: {type(summary).__name__}, Length: {len(summary) if hasattr(summary, '__len__') else 'N/A'}\n"
             full_context += "\n---\n"
 
         system_prompt = self.config.report_system_prompt
-        user_prompt = self.config.report_user_prompt_template.format(full_context=full_context)
+        user_prompt = self.config.report_user_prompt_template.format(
+            full_context=full_context
+        )
 
         messages = [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt}
+            {"role": "user", "content": user_prompt},
         ]
 
-        report_content = self.llm.call_api(messages, self.llm.settings.synthesis_model, response_format="text")
+        report_content = self.llm.call_api(
+            messages, self.llm.settings.synthesis_model, response_format="text"
+        )
         return report_content if report_content else "# Report Generation Failed"
 
     def save_results(self, thematic_summaries: dict, report: str) -> None:
@@ -166,12 +176,12 @@ class ReportSynthesizer:
             report: Generated report content string
         """
         # Save the structured thematic summary
-        thematic_file = self.config.get_file_path('thematic')
+        thematic_file = self.config.get_file_path("thematic")
         self.file_manager.save_json(thematic_summaries, thematic_file)
         print(f"\nSaved thematic summary to {thematic_file}")
 
         # Save the final report as a Markdown file
-        report_file = self.config.get_file_path('report')
+        report_file = self.config.get_file_path("report")
         self.file_manager.save_text(report, report_file)
         print(f"Saved final market validation report to {report_file}")
 
@@ -187,13 +197,15 @@ class ReportSynthesizer:
         print(f"Description: {self.config.concept_description}")
 
         # Load analysis data
-        analysis_file = self.config.get_file_path('analysis')
+        analysis_file = self.config.get_file_path("analysis")
         analysis_data = self.file_manager.load_json(analysis_file)
         if not analysis_data:
             print(f"No analysis data found at {analysis_file}")
             return False
         if not isinstance(analysis_data, list):
-            print(f"Invalid analysis data format at {analysis_file}. Expected a list of dictionaries.")
+            print(
+                f"Invalid analysis data format at {analysis_file}. Expected a list of dictionaries."
+            )
             return False
 
         # Phase 0: Aggregate all the data into master lists
@@ -204,12 +216,12 @@ class ReportSynthesizer:
         for category_key, category_info in self.config.analysis_categories.items():
             thematic_summaries[category_key] = self.perform_thematic_analysis(
                 aggregated_data[category_key],
-                category_info['name'],
-                category_info['description']
+                category_info["name"],
+                category_info["description"],
             )
 
         # Add the non-LLM aggregated data
-        thematic_summaries['high_value_threads'] = aggregated_data['high_value_threads']
+        thematic_summaries["high_value_threads"] = aggregated_data["high_value_threads"]
 
         # Phase 2: Generate the final human-readable report using config prompts
         final_report = self.generate_report(thematic_summaries)
