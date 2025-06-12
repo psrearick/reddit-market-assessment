@@ -154,7 +154,7 @@ class ReportSynthesizer:
             {"role": "user", "content": user_prompt}
         ]
 
-        report_content = self.llm.call_api(messages, self.llm.settings.synthesis_model)
+        report_content = self.llm.call_api(messages, self.llm.settings.synthesis_model, response_format="text")
         return report_content if report_content else "# Report Generation Failed"
 
     def save_results(self, thematic_summaries: dict, report: str) -> None:
